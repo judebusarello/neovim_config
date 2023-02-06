@@ -21,13 +21,13 @@ return {
     enabled = true,
     keys = {
       {
-        "<leader>z",
+        "m",
         vim.lsp.buf.definition,
         desc = "code actions",
         mode = "n",
       },
       {
-        "<leader>Z",
+        "M",
         vim.cmd.pop,
         desc = "code actions",
         mode = "n",
