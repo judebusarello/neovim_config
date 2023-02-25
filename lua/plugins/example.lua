@@ -1,7 +1,8 @@
 return {
   { "folke/trouble.nvim", enabled = true },
   { "folke/zen-mode.nvim", enabled = true },
-  { "goolord/alpha-nvim", enabled = true }, -- Welcome screen
+  { "kdheepak/lazygit.nvim", enabled = true },
+  { "goolord/alpha-nvim", enabled = false }, -- Welcome screen
   { "echasnovski/mini.pairs", enabled = true }, -- This autotypes paired bracus
   { "folke/neodev.nvim", enabled = false },
   { "nvim-lualine/lualine.nvim", enabled = false }, -- don't like statuslines
@@ -14,7 +15,7 @@ return {
   { "hrsh7th/cmp-buffer", enabled = false }, -- I don't want autocomplete to come from random words in the buffer
   { "hrsh7th/cmp-path", enabled = false }, -- I don't use filesystem paths frequently. More likely to mess me up than help me out.
   { "saadparwaiz1/cmp_luasnip", enabled = false }, -- I don't use luasnip. No need to have it for autocomplete
-  { "ggandor/leap.nvim", enabled = false }, -- I don't use easymotions
+  { "ggandor/leap.nvim", enabled = true }, -- I don't use easymotions
 
   {
     "neovim/nvim-lspconfig",
@@ -39,38 +40,56 @@ return {
     enabled = true,
     opts = {
       direction = "float",
+      auto_scroll = false,
+      start_in_insert = true,
       float_opts = {
         border = "curved",
+        width = 270,
+        height = 55,
       },
     },
     keys = {
       {
-        "<esc><esc>",
-        vim.cmd.ToggleTermToggleAll,
-        desc = "code actions",
-        mode = "t",
-      },
-      {
-        "<leader>j",
+        "<leader>k",
         vim.cmd.ToggleTerm,
-        desc = "code actions",
+        desc = "open scratch terminal",
         mode = "n",
       },
       {
-        "<leader>dd",
+        "<leader>mm",
         function()
           local Terminal = require("toggleterm.terminal").Terminal
-          local lazygit = Terminal:new({ cmd = "lazydocker", hidden = true })
-          lazygit:toggle()
+          local spotify = Terminal:new({ cmd = "spt", hidden = true })
+          spotify:toggle()
         end,
-        desc = "open lazydocker",
+        desc = "open spotify cli",
         mode = "n",
       },
+      -- {
+      --   "<leader>dd",
+      --   function()
+      --     local Terminal = require("toggleterm.terminal").Terminal
+      --     local lazydocker = Terminal:new({ cmd = "lazydocker", hidden = true })
+      --     lazydocker:toggle()
+      --   end,
+      --   desc = "open lazydocker",
+      --   mode = "n",
+      -- },
       {
-        "<leader>gg",
+        "<leader>G",
         function()
+          vim.cmd([[
+          if has('nvim') && executable('nvr')
+            let $GIT_EDITOR = "nvr -cc split --remote-wait +'set bufhidden=wipe'"
+          endif
+          ]])
           local Terminal = require("toggleterm.terminal").Terminal
-          local lazygit = Terminal:new({ cmd = "lazygit", hidden = true })
+          local lazygit = Terminal:new({
+            cmd = "lazygit",
+            hidden = true,
+            direction = "float",
+            start_in_insert = true,
+          })
           lazygit:toggle()
         end,
         desc = "open lazygit",
@@ -232,7 +251,7 @@ return {
     enabled = true,
     keys = {
       {
-        "<leader>gb",
+        "<leader>h",
         function()
           require("gitsigns").blame_line({ full = true })
         end,
@@ -240,21 +259,40 @@ return {
         mode = "n",
       },
       {
-        "<leader>gB",
-        function()
-          require("gitsigns").diffthis("~")
-        end,
-        desc = "diff file from git status",
-        mode = "n",
-      },
-      {
-        "<leader>gD",
+        "<leader>d",
         function()
           require("gitsigns").diffthis("HEAD~1")
         end,
         desc = "diff file from previous commit",
         mode = "n",
       },
+    },
+  },
+  {
+    "karb94/neoscroll.nvim",
+    enabled = true,
+    opts = {
+      mappings = {
+        "<C-u>",
+        "<C-d>",
+        "<C-b>",
+        "<C-f>",
+        "<C-y>",
+        "<C-e>",
+        "zt",
+        "zz",
+        "zb",
+        -- "gg",
+        -- "G",
+      },
+      hide_cursor = true, -- Hide cursor while scrolling
+      stop_eof = true, -- Stop at <EOF> when scrolling downwards
+      respect_scrolloff = false, -- Stop scrolling when the cursor reaches the scrolloff margin of the file
+      cursor_scrolls_alone = true, -- The cursor will keep on scrolling even if the window cannot scroll further
+      easing_function = nil, -- Default easing function
+      pre_hook = nil, -- Function to run before the scrolling animation starts
+      post_hook = nil, -- Function to run after the scrolling animation ends
+      performance_mode = false, -- Disable "Performance Mode" on all buffers.
     },
   },
 }
