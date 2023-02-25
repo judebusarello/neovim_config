@@ -18,6 +18,17 @@ return {
   { "ggandor/leap.nvim", enabled = true }, -- I don't use easymotions
 
   {
+    "norcalli/nvim-colorizer.lua",
+    enabled = true,
+    config = function()
+      local colorizer = require("colorizer")
+      colorizer.setup({
+        "*",
+      }, { mode = "foreground" })
+    end,
+  },
+
+  {
     "neovim/nvim-lspconfig",
     enabled = true,
     keys = {
