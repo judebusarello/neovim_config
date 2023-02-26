@@ -245,13 +245,6 @@ return {
       {
         "<leader>;",
         function()
-          require("telescope.builtin").diagnostics()
-        end,
-        desc = "recently used files",
-      },
-      {
-        "<leader>o",
-        function()
           require("telescope.builtin").oldfiles()
         end,
         desc = "recently used files",
