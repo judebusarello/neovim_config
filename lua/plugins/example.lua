@@ -340,7 +340,8 @@ return {
         "<leader>D",
         function()
           if Diffviewopen == false then
-            vim.cmd("DiffviewFileHistory")
+            -- vim.cmd("DiffviewFileHistory")
+            vim.cmd("DiffviewOpen HEAD^")
             Diffviewopen = true
           else
             vim.cmd("tabclose")
@@ -354,7 +355,8 @@ return {
         "<leader>d",
         function()
           if Diffviewopen == false then
-            vim.cmd("DiffviewOpen")
+            vim.cmd("DiffviewOpen HEAD^")
+            vim.cmd("DiffviewToggleFiles")
             Diffviewopen = true
           else
             vim.cmd("tabclose")
