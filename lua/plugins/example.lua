@@ -1,9 +1,5 @@
 vim.cmd([[
   set fillchars+=diff:╱
-  augroup custom_highlight
-    autocmd!
-    au ColorScheme * highlight DiffDelete guifg=#313244 guibg=bg
-  augroup END
   set diffopt=filler,context:50
 ]])
 
@@ -29,8 +25,12 @@ return {
   {
     "sindrets/diffview.nvim",
     enabled = true,
+    opts = {
+      enhanced_diff_hl = true,
+    },
     -- make a key that hides the side panel and closes the diff/opens the regular file
     -- make a key that opens the side panel and runs :DiffviewRefresh
+    --            :DiffviewFileHistory --no-merges
   },
 
   {
@@ -302,14 +302,14 @@ return {
         desc = "show to commit message of the current line",
         mode = "n",
       },
-      {
-        "<leader>d",
-        function()
-          require("gitsigns").diffthis("HEAD~1")
-        end,
-        desc = "diff file from previous commit",
-        mode = "n",
-      },
+      -- {
+      --   "<leader>d",
+      --   function()
+      --     require("gitsigns").diffthis("HEAD~1")
+      --   end,
+      --   desc = "diff file from previous commit",
+      --   mode = "n",
+      -- },
     },
   },
   {
