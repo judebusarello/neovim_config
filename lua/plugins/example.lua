@@ -2,7 +2,7 @@ vim.cmd([[
   set fillchars+=diff:╱
   augroup custom_highlight
     autocmd!
-    au ColorScheme * highlight DiffDelete guifg=#313244 guibg=#1e1e2e
+    au ColorScheme * highlight DiffDelete guifg=#313244 guibg=bg
   augroup END
   set diffopt=filler,context:50
 ]])
