@@ -23,43 +23,6 @@ return {
   { "saadparwaiz1/cmp_luasnip", enabled = false }, -- I don't use luasnip. No need to have it for autocomplete
   { "ggandor/leap.nvim", enabled = true }, -- I don't use easymotions
   { "catppuccin/nvim", name = "catppuccin" },
-  {
-    "sindrets/diffview.nvim",
-    enabled = true,
-    opts = {
-      enhanced_diff_hl = true,
-    },
-    keys = {
-      {
-        "<leader>D",
-        function()
-          if Diffviewopen == false then
-            vim.cmd("DiffviewFileHistory")
-            Diffviewopen = true
-          else
-            vim.cmd("tabclose")
-            Diffviewopen = false
-          end
-        end,
-        desc = "code actions",
-        mode = "n",
-      },
-      {
-        "<leader>d",
-        function()
-          if Diffviewopen == false then
-            vim.cmd("DiffviewOpen")
-            Diffviewopen = true
-          else
-            vim.cmd("tabclose")
-            Diffviewopen = false
-          end
-        end,
-        desc = "code actions",
-        mode = "n",
-      },
-    },
-  },
 
   {
     "norcalli/nvim-colorizer.lua",
@@ -337,14 +300,6 @@ return {
         desc = "show to commit message of the current line",
         mode = "n",
       },
-      -- {
-      --   "<leader>d",
-      --   function()
-      --     require("gitsigns").diffthis("HEAD~1")
-      --   end,
-      --   desc = "diff file from previous commit",
-      --   mode = "n",
-      -- },
     },
   },
   {
@@ -374,23 +329,41 @@ return {
       performance_mode = false, -- Disable "Performance Mode" on all buffers.
     },
   },
+  {
+    "sindrets/diffview.nvim",
+    enabled = true,
+    opts = {
+      enhanced_diff_hl = true,
+    },
+    keys = {
+      {
+        "<leader>D",
+        function()
+          if Diffviewopen == false then
+            vim.cmd("DiffviewFileHistory")
+            Diffviewopen = true
+          else
+            vim.cmd("tabclose")
+            Diffviewopen = false
+          end
+        end,
+        desc = "code actions",
+        mode = "n",
+      },
+      {
+        "<leader>d",
+        function()
+          if Diffviewopen == false then
+            vim.cmd("DiffviewOpen")
+            Diffviewopen = true
+          else
+            vim.cmd("tabclose")
+            Diffviewopen = false
+          end
+        end,
+        desc = "code actions",
+        mode = "n",
+      },
+    },
+  },
 }
--- {
---   "voldikss/vim-floaterm",
---   enabled = true,
---   keys = {
---     {
---       "<leader>k",
---       function()
---         vim.cmd("FloatermToggle " .. "Terminal 2")
---       end,
---       desc = "open scratch terminal",
---     },
---   },
---   config = function()
---     vim.cmd([[hi FloatermBorder guifg=#89B4FA]])
---     vim.g.floaterm_height = 0.82
---     vim.g.floaterm_width = 0.8
---     vim.g.floaterm_borderchars = "─│─│╭╮╯╰"
---   end,
--- },
