@@ -223,33 +223,32 @@ return {
       },
     },
   },
-
-  -- {
-  --   "nvim-telescope/telescope-fzf-native.nvim",
-  --   dependencies = { "nvim-lua/plenary.nvim", "nvim-telescope/telescope.nvim" },
-  --   build = function()
-  --     local job = require("plenary.job")
-  --     job
-  --       :new({
-  --         command = "make",
-  --         cwd = vim.fn.stdpath("data") .. "/lazy/telescope-fzf-native.nvim",
-  --       })
-  --       :sync()
-  --   end,
-  --   config = function()
-  --     require("telescope").load_extension("fzf")
-  --   end,
-  -- },
   {
     "nvim-telescope/telescope.nvim",
     enabled = true,
+    dependencies = {
+      { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
+    },
     opts = {
       defaults = {
         layout_strategy = "vertical",
         layout_config = { prompt_position = "bottom" },
         sorting_strategy = "descending",
       },
+      extensions = {
+        fzf = {
+          fuzzy = true,
+          override_generic_sorter = true,
+          override_file_sorter = true,
+          case_mode = "smart_case",
+        },
+      },
     },
+    config = function(_, opts)
+      local telescope = require("telescope")
+      telescope.setup(opts)
+      telescope.load_extension("fzf")
+    end,
     keys = {
       {
         "<leader>;",
