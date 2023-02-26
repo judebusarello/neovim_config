@@ -1,9 +1,10 @@
-vim.cmd([[set fillchars+=diff:╱]])
 vim.cmd([[
+  set fillchars+=diff:╱
   augroup custom_highlight
     autocmd!
-    au ColorScheme * highlight DiffDelete ctermfg=59 ctermbg=41 guifg=#313244 guibg=#1e1e2e
+    au ColorScheme * highlight DiffDelete guifg=#313244 guibg=#1e1e2e
   augroup END
+  set diffopt=filler,context:50
 ]])
 
 return {
@@ -30,26 +31,6 @@ return {
     enabled = true,
     -- make a key that hides the side panel and closes the diff/opens the regular file
     -- make a key that opens the side panel and runs :DiffviewRefresh
-    opts = {
-      view = {
-        -- Normal and visual mode mapping to vim command:
-        {
-          { "n", "v" },
-          "<leader>a",
-          "<Cmd>echom 'foo'<CR>",
-          { silent = true },
-        },
-        -- Visual mode mapping to lua function:
-        {
-          { "n", "v" },
-          "<leader>b",
-          function()
-            print("bar")
-          end,
-          { nowait = true },
-        },
-      },
-    },
   },
 
   {
@@ -212,7 +193,6 @@ return {
       colorscheme = "catppuccin-mocha",
     },
   },
-
   {
     "akinsho/bufferline.nvim",
     enabled = true,
