@@ -12,7 +12,7 @@ return {
   { "folke/zen-mode.nvim", enabled = true },
   { "kdheepak/lazygit.nvim", enabled = true },
   { "goolord/alpha-nvim", enabled = false }, -- Welcome screen
-  { "echasnovski/mini.pairs", enabled = true }, -- This autotypes paired bracus
+  { "echasnovski/mini.pairs", enabled = false }, -- This autotypes paired bracus
   { "folke/neodev.nvim", enabled = false },
   { "nvim-lualine/lualine.nvim", enabled = false }, -- don't like statuslines
   { "echasnovski/mini.indentscope", enabled = false }, -- the animated scope lines were distracting
@@ -25,7 +25,7 @@ return {
   { "hrsh7th/cmp-path", enabled = false }, -- I don't use filesystem paths frequently. More likely to mess me up than help me out.
   { "saadparwaiz1/cmp_luasnip", enabled = false }, -- I don't use luasnip. No need to have it for autocomplete
   { "ggandor/leap.nvim", enabled = true }, -- I don't use easymotions
-
+  { "catppuccin/nvim", name = "catppuccin" },
   {
     "sindrets/diffview.nvim",
     enabled = true,
@@ -193,6 +193,7 @@ return {
       colorscheme = "catppuccin-mocha",
     },
   },
+
   {
     "akinsho/bufferline.nvim",
     enabled = true,
@@ -223,6 +224,22 @@ return {
     },
   },
 
+  -- {
+  --   "nvim-telescope/telescope-fzf-native.nvim",
+  --   dependencies = { "nvim-lua/plenary.nvim", "nvim-telescope/telescope.nvim" },
+  --   build = function()
+  --     local job = require("plenary.job")
+  --     job
+  --       :new({
+  --         command = "make",
+  --         cwd = vim.fn.stdpath("data") .. "/lazy/telescope-fzf-native.nvim",
+  --       })
+  --       :sync()
+  --   end,
+  --   config = function()
+  --     require("telescope").load_extension("fzf")
+  --   end,
+  -- },
   {
     "nvim-telescope/telescope.nvim",
     enabled = true,
