@@ -2,6 +2,7 @@ vim.cmd([[
   set fillchars+=diff:╱
   set diffopt=filler,context:50
 ]])
+_G.Diffviewopen = false
 
 return {
   { "folke/trouble.nvim", enabled = true },
@@ -28,9 +29,36 @@ return {
     opts = {
       enhanced_diff_hl = true,
     },
-    -- make a key that hides the side panel and closes the diff/opens the regular file
-    -- make a key that opens the side panel and runs :DiffviewRefresh
-    --            :DiffviewFileHistory --no-merges
+    keys = {
+      {
+        "<leader>D",
+        function()
+          if Diffviewopen == false then
+            vim.cmd("DiffviewFileHistory")
+            Diffviewopen = true
+          else
+            vim.cmd("tabclose")
+            Diffviewopen = false
+          end
+        end,
+        desc = "code actions",
+        mode = "n",
+      },
+      {
+        "<leader>d",
+        function()
+          if Diffviewopen == false then
+            vim.cmd("DiffviewOpen")
+            Diffviewopen = true
+          else
+            vim.cmd("tabclose")
+            Diffviewopen = false
+          end
+        end,
+        desc = "code actions",
+        mode = "n",
+      },
+    },
   },
 
   {
@@ -237,10 +265,11 @@ return {
       },
       extensions = {
         fzf = {
-          fuzzy = true,
-          override_generic_sorter = true,
-          override_file_sorter = true,
-          case_mode = "smart_case",
+          fuzzy = true, -- false will only do exact matching
+          override_generic_sorter = true, -- override the generic sorter
+          override_file_sorter = true, -- override the file sorter
+          case_mode = "smart_case", -- or "ignore_case" or "respect_case"
+          -- the default case_mode is "smart_case"
         },
       },
     },
@@ -263,6 +292,13 @@ return {
           require("telescope.builtin").oldfiles()
         end,
         desc = "recently used files",
+      },
+      {
+        "<leader>/",
+        function()
+          require("telescope.builtin").live_grep()
+        end,
+        desc = "files in current folder",
       },
       {
         "<leader>a",
