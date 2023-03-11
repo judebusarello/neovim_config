@@ -171,7 +171,7 @@ end
 -- floating terminal
 map("n", "<leader>ft", function() Util.float_term(nil, { cwd = Util.get_root() }) end, { desc = "Terminal (root dir)" })
 map("n", "<leader>fT", function() Util.float_term() end, { desc = "Terminal (cwd)" })
-map("t", "<esc>", "<c-\\><c-n>", {desc = "Enter Normal Mode"})
+-- map("t", "<esc>", "<c-\\><c-n>", {desc = "Enter Normal Mode"})
 
 -- windows
 map("n", "<leader>ww", "<C-W>p", { desc = "Other window" })

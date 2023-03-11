@@ -30,11 +30,14 @@ return {
     config = function()
       local colorizer = require("colorizer")
       colorizer.setup({
-        "*",
+        "css",
+        "javascript",
+        "javascriptreact",
+        "typescript",
+        "typescriptreact",
       }, { css = true, css_fn = true, mode = "foreground" })
     end,
   },
-
   {
     "neovim/nvim-lspconfig",
     enabled = true,
@@ -218,30 +221,52 @@ return {
     "nvim-telescope/telescope.nvim",
     enabled = true,
     dependencies = {
+      "nvim-lua/plenary.nvim",
+      "debugloop/telescope-undo.nvim",
       { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
     },
     opts = {
       defaults = {
-        layout_strategy = "vertical",
-        layout_config = { prompt_position = "bottom" },
-        sorting_strategy = "descending",
+        prompt_prefix = " ",
+        selection_caret = " ",
+        layout_strategy = "horizontal",
+        layout_config = {
+          horizontal = {
+            preview_width = 0.55,
+            results_width = 0.8,
+          },
+          height = 0.9,
+          width = 0.87,
+          preview_cutoff = 120,
+        },
       },
       extensions = {
         fzf = {
-          fuzzy = true, -- false will only do exact matching
-          override_generic_sorter = true, -- override the generic sorter
-          override_file_sorter = true, -- override the file sorter
-          case_mode = "smart_case", -- or "ignore_case" or "respect_case"
-          -- the default case_mode is "smart_case"
+          fuzzy = true,
+          override_generic_sorter = true,
+          override_file_sorter = true,
+          case_mode = "smart_case",
+        },
+        undo = {
+          use_delta = true,
+          side_by_side = true,
+          layout_strategy = "horizontal",
         },
       },
+      config = function()
+        local telescope = require("telescope")
+        telescope.load_extension("fzf")
+        telescope.load_extension("undo")
+      end,
     },
-    config = function(_, opts)
-      local telescope = require("telescope")
-      telescope.setup(opts)
-      telescope.load_extension("fzf")
-    end,
     keys = {
+      {
+        "<leader>u",
+        function()
+          require("telescope").extensions.undo.undo()
+        end,
+        desc = "telescope undo",
+      },
       {
         "<leader>;",
         function()
@@ -285,6 +310,14 @@ return {
     "lewis6991/gitsigns.nvim",
     enabled = true,
     keys = {
+      {
+        "<leader>d",
+        function()
+          require("gitsigns").diffthis("HEAD~1")
+        end,
+        desc = "diff file from previous commit",
+        mode = "n",
+      },
       {
         "<leader>h",
         function()
@@ -344,21 +377,21 @@ return {
         desc = "code actions",
         mode = "n",
       },
-      {
-        "<leader>d",
-        function()
-          if Diffviewopen == false then
-            vim.cmd("DiffviewOpen HEAD^")
-            vim.cmd("DiffviewToggleFiles")
-            Diffviewopen = true
-          else
-            vim.cmd("tabclose")
-            Diffviewopen = false
-          end
-        end,
-        desc = "code actions",
-        mode = "n",
-      },
+      -- {
+      --   "<leader>d",
+      --   function()
+      --     if Diffviewopen == false then
+      --       vim.cmd("DiffviewOpen")
+      --       vim.cmd("DiffviewToggleFiles")
+      --       Diffviewopen = true
+      --     else
+      --       vim.cmd("tabclose")
+      --       Diffviewopen = false
+      --     end
+      --   end,
+      --   desc = "code actions",
+      --   mode = "n",
+      -- },
     },
   },
 }
