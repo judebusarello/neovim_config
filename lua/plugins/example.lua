@@ -223,6 +223,8 @@ return {
     dependencies = {
       "nvim-lua/plenary.nvim",
       "debugloop/telescope-undo.nvim",
+      "nvim-telescope/telescope-project.nvim",
+      "nvim-telescope/telescope-file-browser.nvim",
       { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
     },
     opts = {
@@ -252,21 +254,40 @@ return {
           side_by_side = true,
           layout_strategy = "horizontal",
         },
+        project = {
+          base_dirs = {
+            "~/vistar",
+            "~/docker-compose",
+          },
+          hidden_files = true,
+          theme = "dropdown",
+          order_by = "asc",
+          search_by = "title",
+          sync_with_nvim_tree = true,
+        },
+        file_browser = {
+          theme = "ivy",
+          -- disables netrw and use telescope-file-browser in its place
+          hijack_netrw = true,
+          mappings = {
+            ["i"] = {
+              -- your custom insert mode mappings
+            },
+            ["n"] = {
+              -- your custom normal mode mappings
+            },
+          },
+        },
       },
       config = function()
         local telescope = require("telescope")
         telescope.load_extension("fzf")
         telescope.load_extension("undo")
+        telescope.load_extension("project")
+        telescope.load_extension("file_browser")
       end,
     },
     keys = {
-      {
-        "<leader>u",
-        function()
-          require("telescope").extensions.undo.undo()
-        end,
-        desc = "telescope undo",
-      },
       {
         "<leader>;",
         function()
@@ -279,7 +300,28 @@ return {
         function()
           require("telescope.builtin").live_grep()
         end,
-        desc = "files in current folder",
+        desc = "fuzzy find all files in repo",
+      },
+      {
+        "<leader>n",
+        function()
+          require("telescope.builtin").git_bcommits()
+        end,
+        desc = "commits to the file in this buffer",
+      },
+      {
+        "<leader>u",
+        function()
+          require("telescope").extensions.undo.undo()
+        end,
+        desc = "telescope undo",
+      },
+      {
+        "<leader>p",
+        function()
+          require("telescope").extensions.project.project({})
+        end,
+        desc = "project picker",
       },
       {
         "<leader>a",
@@ -295,17 +337,11 @@ return {
         function()
           require("telescope.builtin").git_status()
         end,
-        desc = "files in git status",
-      },
-      {
-        "<leader>n",
-        function()
-          require("telescope.builtin").git_bcommits()
-        end,
-        desc = "commits to the file in this buffer",
+        desc = "files staged in git",
       },
     },
   },
+
   {
     "lewis6991/gitsigns.nvim",
     enabled = true,
