@@ -25,6 +25,30 @@ return {
   { "ggandor/leap.nvim", enabled = true }, -- I don't use easymotions
   { "catppuccin/nvim", name = "catppuccin" },
   {
+    "rcarriga/nvim-notify",
+    enabled = true,
+    config = function()
+      local stages = require("notify.stages.fade")("top_down")
+      local notify = require("notify")
+
+      notify.setup({
+        render = "minimal",
+        stages = {
+          function(...)
+            local opts = stages[1](...)
+            if opts then
+              opts.border = "none"
+              opts.row = opts.row + 1
+            end
+            return opts
+          end,
+          unpack(stages, 2),
+        },
+        timeout = 0,
+      })
+    end,
+  },
+  {
     "folke/noice.nvim",
     enabled = true,
     opts = {
@@ -35,11 +59,6 @@ return {
         view_warn = "mini", -- view for warnings
         view_history = "messages", -- view for :messages
         view_search = false, -- view for search count messages. Set to `false` to disable
-      },
-      lsp = {
-        progress = {
-          enabled = false,
-        },
       },
       views = {
         cmdline_popup = {
@@ -76,13 +95,13 @@ return {
       {
         "m",
         vim.lsp.buf.definition,
-        desc = "code actions",
+        desc = "jump to definition",
         mode = "n",
       },
       {
         "M",
         vim.cmd.pop,
-        desc = "code actions",
+        desc = "jump back from definition",
         mode = "n",
       },
     },
@@ -101,6 +120,12 @@ return {
       },
     },
     keys = {
+      {
+        "<leader>j",
+        vim.cmd.ToggleTerm,
+        desc = "open scratch terminal",
+        mode = "n",
+      },
       {
         "<leader>k",
         vim.cmd.ToggleTerm,
@@ -376,14 +401,14 @@ return {
     "lewis6991/gitsigns.nvim",
     enabled = true,
     keys = {
-      {
-        "<leader>d",
-        function()
-          require("gitsigns").diffthis("HEAD~1")
-        end,
-        desc = "diff file from previous commit",
-        mode = "n",
-      },
+      -- {
+      --   "<leader>d",
+      --   function()
+      --     require("gitsigns").diffthis("HEAD~1")
+      --   end,
+      --   desc = "diff file from previous commit",
+      --   mode = "n",
+      -- },
       {
         "<leader>h",
         function()
@@ -392,33 +417,6 @@ return {
         desc = "show to commit message of the current line",
         mode = "n",
       },
-    },
-  },
-  {
-    "karb94/neoscroll.nvim",
-    enabled = true,
-    opts = {
-      mappings = {
-        "<C-u>",
-        "<C-d>",
-        "<C-b>",
-        "<C-f>",
-        "<C-y>",
-        "<C-e>",
-        "zt",
-        "zz",
-        "zb",
-        -- "gg",
-        -- "G",
-      },
-      hide_cursor = true, -- Hide cursor while scrolling
-      stop_eof = true, -- Stop at <EOF> when scrolling downwards
-      respect_scrolloff = false, -- Stop scrolling when the cursor reaches the scrolloff margin of the file
-      cursor_scrolls_alone = true, -- The cursor will keep on scrolling even if the window cannot scroll further
-      easing_function = nil, -- Default easing function
-      pre_hook = nil, -- Function to run before the scrolling animation starts
-      post_hook = nil, -- Function to run after the scrolling animation ends
-      performance_mode = false, -- Disable "Performance Mode" on all buffers.
     },
   },
   {
@@ -443,21 +441,26 @@ return {
         desc = "code actions",
         mode = "n",
       },
-      -- {
-      --   "<leader>d",
-      --   function()
-      --     if Diffviewopen == false then
-      --       vim.cmd("DiffviewOpen")
-      --       vim.cmd("DiffviewToggleFiles")
-      --       Diffviewopen = true
-      --     else
-      --       vim.cmd("tabclose")
-      --       Diffviewopen = false
-      --     end
-      --   end,
-      --   desc = "code actions",
-      --   mode = "n",
-      -- },
+      {
+        "<leader>d",
+        function()
+          local mark = vim.api.nvim_buf_get_mark(0, '"')
+          local lcount = vim.api.nvim_buf_line_count(0)
+          if Diffviewopen == false then
+            vim.cmd("DiffviewOpen")
+            vim.cmd("DiffviewToggleFiles")
+            Diffviewopen = true
+          else
+            vim.cmd("tabclose")
+            Diffviewopen = false
+          end
+          if mark[1] > 0 and mark[1] <= lcount then
+            pcall(vim.api.nvim_win_set_cursor, 0, mark)
+          end
+        end,
+        desc = "code actions",
+        mode = "n",
+      },
     },
   },
 }
