@@ -1,6 +1,8 @@
 vim.opt.fillchars:append({ diff = "╱" })
 vim.opt.diffopt:append("context:3")
 vim.opt.diffopt:append("filler")
+vim.opt.diffopt:append("algorithm:histogram")
+vim.opt.diffopt:append("indent-heuristic")
 
 _G.Diffviewopen = false
 
