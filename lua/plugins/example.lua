@@ -10,6 +10,8 @@ return {
   { "kdheepak/lazygit.nvim", enabled = true },
   { "goolord/alpha-nvim", enabled = false }, -- Welcome screen
   { "echasnovski/mini.pairs", enabled = false }, -- This autotypes paired bracus
+  { "echasnovski/mini.pairs", enabled = false }, -- This autotypes paired bracus
+  { "nvim-neo-tree/neo-tree.nvim", enabled = false }, -- I prefer the telescope extension for this stuff
   { "folke/neodev.nvim", enabled = false },
   { "nvim-lualine/lualine.nvim", enabled = false }, -- don't like statuslines
   { "echasnovski/mini.indentscope", enabled = false }, -- the animated scope lines were distracting
@@ -17,13 +19,30 @@ return {
   { "SmiteshP/nvim-navic", enabled = false }, -- This shows data in the statusbar that I don't have
   { "folke/trouble.nvim", enabled = false }, -- this is a list of all the diagnostic errors etc. Don't use it
   { "RRethy/vim-illuminate", enabled = false }, -- underlines all the same words as under the cursor. I find this distracting.
-  { "rcarriga/nvim-notify", enabled = false }, -- I don't like the fancy notifications. Bottom right is just fine by me
   { "hrsh7th/cmp-buffer", enabled = false }, -- I don't want autocomplete to come from random words in the buffer
   { "hrsh7th/cmp-path", enabled = false }, -- I don't use filesystem paths frequently. More likely to mess me up than help me out.
   { "saadparwaiz1/cmp_luasnip", enabled = false }, -- I don't use luasnip. No need to have it for autocomplete
   { "ggandor/leap.nvim", enabled = true }, -- I don't use easymotions
   { "catppuccin/nvim", name = "catppuccin" },
-
+  {
+    "folke/noice.nvim",
+    enabled = true,
+    opts = {
+      messages = {
+        enabled = true, -- enables the Noice messages UI
+        view = "mini", -- default view for messages
+        view_error = "mini", -- view for errors
+        view_warn = "mini", -- view for warnings
+        view_history = "messages", -- view for :messages
+        view_search = false, -- view for search count messages. Set to `false` to disable
+      },
+      lsp = {
+        progress = {
+          enabled = false,
+        },
+      },
+    },
+  },
   {
     "norcalli/nvim-colorizer.lua",
     enabled = true,
@@ -263,7 +282,6 @@ return {
           theme = "dropdown",
           order_by = "asc",
           search_by = "title",
-          sync_with_nvim_tree = true,
         },
         file_browser = {
           theme = "ivy",
@@ -317,20 +335,20 @@ return {
         desc = "telescope undo",
       },
       {
+        "<leader>e",
+        function()
+          require("telescope").extensions.file_browser.file_browser({
+            cwd = vim.fn.expand("%:p:h"),
+          })
+        end,
+        desc = "file browser for current folder",
+      },
+      {
         "<leader>p",
         function()
           require("telescope").extensions.project.project({})
         end,
         desc = "project picker",
-      },
-      {
-        "<leader>a",
-        function()
-          require("telescope.builtin").find_files({
-            cwd = vim.fn.expand("%:p:h"),
-          })
-        end,
-        desc = "files in current folder",
       },
       {
         "<leader>i",
