@@ -1,7 +1,7 @@
-vim.cmd([[
-  set fillchars+=diff:╱
-  set diffopt=filler,context:50
-]])
+vim.opt.fillchars:append({ diff = "╱" })
+vim.opt.diffopt:append("context:3")
+vim.opt.diffopt:append("filler")
+
 _G.Diffviewopen = false
 
 return {
@@ -427,11 +427,28 @@ return {
     },
     keys = {
       {
+        "<leader>H",
+        function()
+          if Diffviewopen == false then
+            if vim.api.nvim_get_mode().mode == "v" then
+              vim.cmd("<cmd>'<,'>DiffviewFileHistory %")
+            else
+              vim.cmd("DiffviewFileHistory %")
+            end
+            Diffviewopen = true
+          else
+            vim.cmd("tabclose")
+            Diffviewopen = false
+          end
+        end,
+        desc = "code actions",
+        mode = "v",
+      },
+      {
         "<leader>D",
         function()
           if Diffviewopen == false then
-            -- vim.cmd("DiffviewFileHistory")
-            vim.cmd("DiffviewOpen HEAD^")
+            vim.cmd("DiffviewOpen HEAD^ -- %")
             Diffviewopen = true
           else
             vim.cmd("tabclose")
