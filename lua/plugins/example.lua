@@ -281,9 +281,15 @@ return {
     dependencies = {
       "nvim-lua/plenary.nvim",
       "debugloop/telescope-undo.nvim",
+      "nvim-telescope/telescope-github.nvim",
       "nvim-telescope/telescope-project.nvim",
       "nvim-telescope/telescope-file-browser.nvim",
-      { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
+      "nvim-telescope/telescope-fzf-writer.nvim",
+      {
+        "nvim-telescope/telescope-fzf-native.nvim",
+        build = "make",
+        lazy = false,
+      },
     },
     opts = {
       defaults = {
@@ -301,6 +307,15 @@ return {
         },
       },
       extensions = {
+        fzf_writer = {
+          minimum_grep_characters = 2,
+          minimum_files_characters = 2,
+
+          -- Disabled by default.
+          -- Will probably slow down some aspects of the sorter, but can make color highlights.
+          -- I will work on this more later.
+          use_highlighter = true,
+        },
         fzf = {
           fuzzy = true,
           override_generic_sorter = true,
@@ -338,13 +353,22 @@ return {
       },
       config = function()
         local telescope = require("telescope")
+        telescope.load_extension("gh")
         telescope.load_extension("fzf")
+        telescope.load_extension("fzf_writer")
         telescope.load_extension("undo")
         telescope.load_extension("project")
         telescope.load_extension("file_browser")
       end,
     },
     keys = {
+      {
+        "<leader>GG",
+        function()
+          require("telescope").extensions.gh.gist()
+        end,
+        desc = "recently used files",
+      },
       {
         "<leader>;",
         function()
@@ -355,6 +379,7 @@ return {
       {
         "<leader>/",
         function()
+          -- require("telescope").extensions.fzf_writer.grep()
           require("telescope.builtin").live_grep()
         end,
         desc = "fuzzy find all files in repo",
@@ -426,36 +451,90 @@ return {
     enabled = true,
     opts = {
       enhanced_diff_hl = true,
+      show_helpful_hints = false,
+      view = {
+        -- Configure the layout and behavior of different types of views.
+        -- Available layouts:
+        --  'diff1_plain'
+        --    |'diff2_horizontal'
+        --    |'diff2_vertical'
+        --    |'diff3_horizontal'
+        --    |'diff3_vertical'
+        --    |'diff3_mixed'
+        --    |'diff4_mixed'
+        -- For more info, see |diffview-config-view.x.layout|.
+        default = {
+          -- Config for changed files, and staged files in diff views.
+          layout = "diff2_horizontal",
+          winbar_info = false, -- See |diffview-config-view.x.winbar_info|
+        },
+        merge_tool = {
+          -- Config for conflicted files in diff views during a merge or rebase.
+          layout = "diff3_horizontal",
+          disable_diagnostics = true, -- Temporarily disable diagnostics for conflict buffers while in the view.
+          winbar_info = true, -- See |diffview-config-view.x.winbar_info|
+        },
+        file_history = {
+          -- Config for changed files in file history views.
+          layout = "diff2_horizontal",
+          winbar_info = false, -- See |diffview-config-view.x.winbar_info|
+        },
+      },
+      file_panel = {
+        listing_style = "tree", -- One of 'list' or 'tree'
+        tree_options = { -- Only applies when listing_style is 'tree'
+          flatten_dirs = true, -- Flatten dirs that only contain one single dir
+          folder_statuses = "only_folded", -- One of 'never', 'only_folded' or 'always'.
+        },
+        win_config = { -- See |diffview-config-win_config|
+          position = "left",
+          width = 35,
+          win_opts = {},
+        },
+      },
+      file_history_panel = {
+        log_options = { -- See |diffview-config-log_options|
+          git = {
+            single_file = {
+              diff_merges = "combined",
+            },
+            multi_file = {
+              diff_merges = "first-parent",
+            },
+          },
+          hg = {
+            single_file = {},
+            multi_file = {},
+          },
+        },
+        win_config = { -- See |diffview-config-win_config|
+          position = "bottom",
+          height = 16,
+          win_opts = {},
+        },
+      },
+      commit_log_panel = {
+        win_config = {}, -- See |diffview-config-win_config|
+      },
+      default_args = { -- Default args prepended to the arg-list for the listed commands
+        DiffviewOpen = {},
+        DiffviewFileHistory = {},
+      },
     },
     keys = {
       {
-        "<leader>H",
-        function()
-          if Diffviewopen == false then
-            if vim.api.nvim_get_mode().mode == "v" then
-              vim.cmd("<cmd>'<,'>DiffviewFileHistory %")
-            else
-              vim.cmd("DiffviewFileHistory %")
-            end
-            Diffviewopen = true
-          else
-            vim.cmd("tabclose")
-            Diffviewopen = false
-          end
-        end,
-        desc = "code actions",
-        mode = "v",
-      },
-      {
         "<leader>D",
         function()
+          local cursor_pos = vim.fn.getpos(".")
           if Diffviewopen == false then
-            vim.cmd("DiffviewOpen HEAD^ -- %")
+            vim.cmd("DiffviewFileHistory")
+            vim.cmd("DiffviewToggleFiles")
             Diffviewopen = true
           else
-            vim.cmd("tabclose")
+            vim.cmd("DiffviewClose")
             Diffviewopen = false
           end
+          vim.fn.setpos(".", cursor_pos)
         end,
         desc = "code actions",
         mode = "n",
@@ -463,22 +542,33 @@ return {
       {
         "<leader>d",
         function()
-          local mark = vim.api.nvim_buf_get_mark(0, '"')
-          local lcount = vim.api.nvim_buf_line_count(0)
           if Diffviewopen == false then
-            vim.cmd("DiffviewOpen")
-            vim.cmd("DiffviewToggleFiles")
+            if
+              vim.api.nvim_get_mode().mode == "v"
+              or vim.api.nvim_get_mode().mode == "V"
+            then
+              local start_row
+              local end_row
+              _, start_row, _, _ = unpack(vim.fn.getpos("'<"))
+              _, end_row, _, _ = unpack(vim.fn.getpos("'>"))
+              local cmd = "DiffviewFileHistory -L"
+                .. start_row
+                .. ","
+                .. end_row
+                .. ":"
+                .. vim.api.nvim_buf_get_name(0)
+              vim.cmd(cmd)
+            else
+              vim.cmd("DiffviewFileHistory %")
+            end
             Diffviewopen = true
           else
-            vim.cmd("tabclose")
+            vim.cmd("DiffviewClose")
             Diffviewopen = false
-          end
-          if mark[1] > 0 and mark[1] <= lcount then
-            pcall(vim.api.nvim_win_set_cursor, 0, mark)
           end
         end,
         desc = "code actions",
-        mode = "n",
+        mode = { "v", "n" },
       },
     },
   },
