@@ -1,5 +1,5 @@
 vim.opt.fillchars:append({ diff = "╱" })
-vim.opt.diffopt:append("context:3")
+vim.opt.diffopt:append("context:3999")
 vim.opt.diffopt:append("filler")
 vim.opt.diffopt:append("algorithm:histogram")
 vim.opt.diffopt:append("indent-heuristic")
@@ -25,6 +25,8 @@ return {
   { "hrsh7th/cmp-path", enabled = false }, -- I don't use filesystem paths frequently. More likely to mess me up than help me out.
   { "saadparwaiz1/cmp_luasnip", enabled = false }, -- I don't use luasnip. No need to have it for autocomplete
   { "ggandor/leap.nvim", enabled = true }, -- I don't use easymotions
+  { "HiPhish/nvim-ts-rainbow2", enabled = true }, -- colorize parens and brackets
+  -- { "anuvyklack/pretty-fold.nvim", enabled = true }, -- I don't use easymotions
   { "catppuccin/nvim", name = "catppuccin" },
   {
     "rcarriga/nvim-notify",
@@ -50,6 +52,19 @@ return {
       })
     end,
   },
+  {
+    "nvim-treesitter",
+    enabled = true,
+    -- Works, but messes up python coloring
+    -- config = function()
+    --   local treesitter = require("nvim-treesitter.configs")
+    --   treesitter.setup({
+    --     rainbow = {
+    --       enable = false,
+    --     },
+    --   })
+    -- end,
+  }, -- colorize parens and brackets
   {
     "folke/noice.nvim",
     enabled = true,
@@ -381,6 +396,12 @@ return {
         function()
           -- require("telescope").extensions.fzf_writer.grep()
           require("telescope.builtin").live_grep()
+          -- require("telescope.builtin").grep_string({
+          --   shorten_path = true,
+          --   word_match = "-w",
+          --   only_sort_text = true,
+          --   search = "",
+          -- })
         end,
         desc = "fuzzy find all files in repo",
       },
@@ -451,7 +472,7 @@ return {
     enabled = true,
     opts = {
       enhanced_diff_hl = true,
-      show_helpful_hints = false,
+      show_help_hints = false,
       view = {
         -- Configure the layout and behavior of different types of views.
         -- Available layouts:
@@ -559,7 +580,7 @@ return {
                 .. vim.api.nvim_buf_get_name(0)
               vim.cmd(cmd)
             else
-              vim.cmd("DiffviewFileHistory %")
+              vim.cmd("DiffviewFileHistory")
             end
             Diffviewopen = true
           else
