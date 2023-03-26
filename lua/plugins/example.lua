@@ -135,7 +135,11 @@ return {
     keys = {
       {
         "<leader>j",
-        vim.cmd.ToggleTerm,
+        function()
+          local Terminal = require("toggleterm.terminal").Terminal
+          local term1 = Terminal:new({})
+          term1:toggle()
+        end,
         desc = "open scratch terminal",
         mode = "n",
       },
@@ -165,26 +169,26 @@ return {
       --   desc = "open lazydocker",
       --   mode = "n",
       -- },
-      {
-        "<leader>G",
-        function()
-          vim.cmd([[
-          if has('nvim') && executable('nvr')
-            let $GIT_EDITOR = "nvr -cc split --remote-wait +'set bufhidden=wipe'"
-          endif
-          ]])
-          local Terminal = require("toggleterm.terminal").Terminal
-          local lazygit = Terminal:new({
-            cmd = "lazygit",
-            hidden = true,
-            direction = "float",
-            start_in_insert = true,
-          })
-          lazygit:toggle()
-        end,
-        desc = "open lazygit",
-        mode = "n",
-      },
+      -- {
+      --   "<leader>G",
+      --   function()
+      --     vim.cmd([[
+      --     if has('nvim') && executable('nvr')
+      --       let $GIT_EDITOR = "nvr -cc split --remote-wait +'set bufhidden=wipe'"
+      --     endif
+      --     ]])
+      --     local Terminal = require("toggleterm.terminal").Terminal
+      --     local lazygit = Terminal:new({
+      --       cmd = "lazygit",
+      --       hidden = true,
+      --       direction = "float",
+      --       start_in_insert = true,
+      --     })
+      --     lazygit:toggle()
+      --   end,
+      --   desc = "open lazygit",
+      --   mode = "n",
+      -- },
     },
   },
   {
@@ -241,7 +245,7 @@ return {
     end,
     keys = {
       {
-        "<leader>cx",
+        ";",
         vim.lsp.buf.code_action,
         desc = "code actions",
         mode = "n",
