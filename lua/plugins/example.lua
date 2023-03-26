@@ -55,16 +55,12 @@ return {
   {
     "nvim-treesitter",
     enabled = true,
-    -- Works, but messes up python coloring
-    -- config = function()
-    --   local treesitter = require("nvim-treesitter.configs")
-    --   treesitter.setup({
-    --     rainbow = {
-    --       enable = false,
-    --     },
-    --   })
-    -- end,
-  }, -- colorize parens and brackets
+    opts = {
+      rainbow = {
+        enable = true,
+      },
+    },
+  },
   {
     "folke/noice.nvim",
     enabled = true,
