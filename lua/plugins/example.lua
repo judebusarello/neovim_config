@@ -385,7 +385,7 @@ return {
         desc = "recently used files",
       },
       {
-        "<leader>;",
+        "<leader>f",
         function()
           require("telescope.builtin").oldfiles()
         end,
@@ -435,13 +435,14 @@ return {
         end,
         desc = "project picker",
       },
-      {
-        "<leader>i",
-        function()
-          require("telescope.builtin").git_status()
-        end,
-        desc = "files staged in git",
-      },
+      -- let's find a way to do all my git stuff with lazygit
+      -- {
+      --   "<leader>i",
+      --   function()
+      --     require("telescope.builtin").git_status()
+      --   end,
+      --   desc = "files staged in git",
+      -- },
     },
   },
 
@@ -449,14 +450,14 @@ return {
     "lewis6991/gitsigns.nvim",
     enabled = true,
     keys = {
-      -- {
-      --   "<leader>d",
-      --   function()
-      --     require("gitsigns").diffthis("HEAD~1")
-      --   end,
-      --   desc = "diff file from previous commit",
-      --   mode = "n",
-      -- },
+      {
+        "<leader>d",
+        function()
+          require("gitsigns").diffthis("HEAD~1")
+        end,
+        desc = "diff file from previous commit",
+        mode = "n",
+      },
       {
         "<leader>h",
         function()
@@ -560,37 +561,37 @@ return {
         desc = "code actions",
         mode = "n",
       },
-      {
-        "<leader>d",
-        function()
-          if Diffviewopen == false then
-            if
-              vim.api.nvim_get_mode().mode == "v"
-              or vim.api.nvim_get_mode().mode == "V"
-            then
-              local start_row
-              local end_row
-              _, start_row, _, _ = unpack(vim.fn.getpos("'<"))
-              _, end_row, _, _ = unpack(vim.fn.getpos("'>"))
-              local cmd = "DiffviewFileHistory -L"
-                .. start_row
-                .. ","
-                .. end_row
-                .. ":"
-                .. vim.api.nvim_buf_get_name(0)
-              vim.cmd(cmd)
-            else
-              vim.cmd("DiffviewFileHistory")
-            end
-            Diffviewopen = true
-          else
-            vim.cmd("DiffviewClose")
-            Diffviewopen = false
-          end
-        end,
-        desc = "code actions",
-        mode = { "v", "n" },
-      },
+      -- {
+      --   "<leader>d",
+      --   function()
+      --     if Diffviewopen == false then
+      --       if
+      --         vim.api.nvim_get_mode().mode == "v"
+      --         or vim.api.nvim_get_mode().mode == "V"
+      --       then
+      --         local start_row
+      --         local end_row
+      --         _, start_row, _, _ = unpack(vim.fn.getpos("'<"))
+      --         _, end_row, _, _ = unpack(vim.fn.getpos("'>"))
+      --         local cmd = "DiffviewFileHistory -L"
+      --           .. start_row
+      --           .. ","
+      --           .. end_row
+      --           .. ":"
+      --           .. vim.api.nvim_buf_get_name(0)
+      --         vim.cmd(cmd)
+      --       else
+      --         vim.cmd("DiffviewFileHistory")
+      --       end
+      --       Diffviewopen = true
+      --     else
+      --       vim.cmd("DiffviewClose")
+      --       Diffviewopen = false
+      --     end
+      --   end,
+      --   desc = "code actions",
+      --   mode = { "v", "n" },
+      -- },
     },
   },
 }
