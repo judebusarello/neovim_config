@@ -1,12 +1,14 @@
 vim.opt.fillchars:append({ diff = "╱" })
-vim.opt.diffopt:append("context:3999")
 vim.opt.diffopt:append("filler")
 vim.opt.diffopt:append("algorithm:histogram")
 vim.opt.diffopt:append("indent-heuristic")
+vim.opt.colorcolumn = "80"
 
 _G.Diffviewopen = false
 
 return {
+  { "catppuccin/nvim", name = "catppuccin" },
+  { "HiPhish/nvim-ts-rainbow2", enabled = true }, -- colorize parens and brackets
   { "folke/trouble.nvim", enabled = true },
   { "folke/zen-mode.nvim", enabled = true },
   { "kdheepak/lazygit.nvim", enabled = true },
@@ -25,9 +27,15 @@ return {
   { "hrsh7th/cmp-path", enabled = false }, -- I don't use filesystem paths frequently. More likely to mess me up than help me out.
   { "saadparwaiz1/cmp_luasnip", enabled = false }, -- I don't use luasnip. No need to have it for autocomplete
   { "ggandor/leap.nvim", enabled = true }, -- I don't use easymotions
-  { "HiPhish/nvim-ts-rainbow2", enabled = true }, -- colorize parens and brackets
+  { "Bekaboo/deadcolumn.nvim", enabled = true }, -- show colorcolumn as you approach
   -- { "anuvyklack/pretty-fold.nvim", enabled = true }, -- I don't use easymotions
-  { "catppuccin/nvim", name = "catppuccin" },
+
+  -- { "projekt0n/circles.nvim", enabled = true,
+  --   dependencies = {
+  --     "nvim-tree/nvim-web-devicons",
+  --   },
+  -- },
+
   {
     "rcarriga/nvim-notify",
     enabled = true,
@@ -236,10 +244,12 @@ return {
           null_ls.builtins.formatting.isort,
           null_ls.builtins.formatting.jq,
           null_ls.builtins.formatting.shfmt,
+          null_ls.builtins.formatting.buildifier,
           null_ls.builtins.diagnostics.eslint,
           null_ls.builtins.diagnostics.pyright,
           null_ls.builtins.completion.spell,
           null_ls.builtins.code_actions.gitsigns,
+          null_ls.builtins.code_actions.refactoring,
         },
       })
     end,
@@ -445,7 +455,6 @@ return {
       -- },
     },
   },
-
   {
     "lewis6991/gitsigns.nvim",
     enabled = true,
@@ -468,130 +477,130 @@ return {
       },
     },
   },
-  {
-    "sindrets/diffview.nvim",
-    enabled = true,
-    opts = {
-      enhanced_diff_hl = true,
-      show_help_hints = false,
-      view = {
-        -- Configure the layout and behavior of different types of views.
-        -- Available layouts:
-        --  'diff1_plain'
-        --    |'diff2_horizontal'
-        --    |'diff2_vertical'
-        --    |'diff3_horizontal'
-        --    |'diff3_vertical'
-        --    |'diff3_mixed'
-        --    |'diff4_mixed'
-        -- For more info, see |diffview-config-view.x.layout|.
-        default = {
-          -- Config for changed files, and staged files in diff views.
-          layout = "diff2_horizontal",
-          winbar_info = false, -- See |diffview-config-view.x.winbar_info|
-        },
-        merge_tool = {
-          -- Config for conflicted files in diff views during a merge or rebase.
-          layout = "diff3_horizontal",
-          disable_diagnostics = true, -- Temporarily disable diagnostics for conflict buffers while in the view.
-          winbar_info = true, -- See |diffview-config-view.x.winbar_info|
-        },
-        file_history = {
-          -- Config for changed files in file history views.
-          layout = "diff2_horizontal",
-          winbar_info = false, -- See |diffview-config-view.x.winbar_info|
-        },
-      },
-      file_panel = {
-        listing_style = "tree", -- One of 'list' or 'tree'
-        tree_options = { -- Only applies when listing_style is 'tree'
-          flatten_dirs = true, -- Flatten dirs that only contain one single dir
-          folder_statuses = "only_folded", -- One of 'never', 'only_folded' or 'always'.
-        },
-        win_config = { -- See |diffview-config-win_config|
-          position = "left",
-          width = 35,
-          win_opts = {},
-        },
-      },
-      file_history_panel = {
-        log_options = { -- See |diffview-config-log_options|
-          git = {
-            single_file = {
-              diff_merges = "combined",
-            },
-            multi_file = {
-              diff_merges = "first-parent",
-            },
-          },
-          hg = {
-            single_file = {},
-            multi_file = {},
-          },
-        },
-        win_config = { -- See |diffview-config-win_config|
-          position = "bottom",
-          height = 16,
-          win_opts = {},
-        },
-      },
-      commit_log_panel = {
-        win_config = {}, -- See |diffview-config-win_config|
-      },
-      default_args = { -- Default args prepended to the arg-list for the listed commands
-        DiffviewOpen = {},
-        DiffviewFileHistory = {},
-      },
-    },
-    keys = {
-      {
-        "<leader>D",
-        function()
-          local cursor_pos = vim.fn.getpos(".")
-          if Diffviewopen == false then
-            vim.cmd("DiffviewFileHistory")
-            vim.cmd("DiffviewToggleFiles")
-            Diffviewopen = true
-          else
-            vim.cmd("DiffviewClose")
-            Diffviewopen = false
-          end
-          vim.fn.setpos(".", cursor_pos)
-        end,
-        desc = "code actions",
-        mode = "n",
-      },
-      -- {
-      --   "<leader>d",
-      --   function()
-      --     if Diffviewopen == false then
-      --       if
-      --         vim.api.nvim_get_mode().mode == "v"
-      --         or vim.api.nvim_get_mode().mode == "V"
-      --       then
-      --         local start_row
-      --         local end_row
-      --         _, start_row, _, _ = unpack(vim.fn.getpos("'<"))
-      --         _, end_row, _, _ = unpack(vim.fn.getpos("'>"))
-      --         local cmd = "DiffviewFileHistory -L"
-      --           .. start_row
-      --           .. ","
-      --           .. end_row
-      --           .. ":"
-      --           .. vim.api.nvim_buf_get_name(0)
-      --         vim.cmd(cmd)
-      --       else
-      --         vim.cmd("DiffviewFileHistory")
-      --       end
-      --       Diffviewopen = true
-      --     else
-      --       vim.cmd("DiffviewClose")
-      --       Diffviewopen = false
-      --     end
-      --   end,
-      --   desc = "code actions",
-      --   mode = { "v", "n" },
-      -- },
-    },
-  },
+  -- {
+  --   "sindrets/diffview.nvim",
+  --   enabled = true,
+  --   opts = {
+  --     enhanced_diff_hl = true,
+  --     show_help_hints = false,
+  --     view = {
+  --       -- Configure the layout and behavior of different types of views.
+  --       -- Available layouts:
+  --       --  'diff1_plain'
+  --       --    |'diff2_horizontal'
+  --       --    |'diff2_vertical'
+  --       --    |'diff3_horizontal'
+  --       --    |'diff3_vertical'
+  --       --    |'diff3_mixed'
+  --       --    |'diff4_mixed'
+  --       -- For more info, see |diffview-config-view.x.layout|.
+  --       default = {
+  --         -- Config for changed files, and staged files in diff views.
+  --         layout = "diff2_horizontal",
+  --         winbar_info = false, -- See |diffview-config-view.x.winbar_info|
+  --       },
+  --       merge_tool = {
+  --         -- Config for conflicted files in diff views during a merge or rebase.
+  --         layout = "diff3_horizontal",
+  --         disable_diagnostics = true, -- Temporarily disable diagnostics for conflict buffers while in the view.
+  --         winbar_info = true, -- See |diffview-config-view.x.winbar_info|
+  --       },
+  --       file_history = {
+  --         -- Config for changed files in file history views.
+  --         layout = "diff2_horizontal",
+  --         winbar_info = false, -- See |diffview-config-view.x.winbar_info|
+  --       },
+  --     },
+  --     file_panel = {
+  --       listing_style = "tree", -- One of 'list' or 'tree'
+  --       tree_options = { -- Only applies when listing_style is 'tree'
+  --         flatten_dirs = true, -- Flatten dirs that only contain one single dir
+  --         folder_statuses = "only_folded", -- One of 'never', 'only_folded' or 'always'.
+  --       },
+  --       win_config = { -- See |diffview-config-win_config|
+  --         position = "left",
+  --         width = 35,
+  --         win_opts = {},
+  --       },
+  --     },
+  --     file_history_panel = {
+  --       log_options = { -- See |diffview-config-log_options|
+  --         git = {
+  --           single_file = {
+  --             diff_merges = "combined",
+  --           },
+  --           multi_file = {
+  --             diff_merges = "first-parent",
+  --           },
+  --         },
+  --         hg = {
+  --           single_file = {},
+  --           multi_file = {},
+  --         },
+  --       },
+  --       win_config = { -- See |diffview-config-win_config|
+  --         position = "bottom",
+  --         height = 16,
+  --         win_opts = {},
+  --       },
+  --     },
+  --     commit_log_panel = {
+  --       win_config = {}, -- See |diffview-config-win_config|
+  --     },
+  --     default_args = { -- Default args prepended to the arg-list for the listed commands
+  --       DiffviewOpen = {},
+  --       DiffviewFileHistory = {},
+  --     },
+  --   },
+  --   keys = {
+  --     {
+  --       "<leader>D",
+  --       function()
+  --         local cursor_pos = vim.fn.getpos(".")
+  --         if Diffviewopen == false then
+  --           vim.cmd("DiffviewFileHistory")
+  --           vim.cmd("DiffviewToggleFiles")
+  --           Diffviewopen = true
+  --         else
+  --           vim.cmd("DiffviewClose")
+  --           Diffviewopen = false
+  --         end
+  --         vim.fn.setpos(".", cursor_pos)
+  --       end,
+  --       desc = "code actions",
+  --       mode = "n",
+  --     },
+  --     -- {
+  --     --   "<leader>d",
+  --     --   function()
+  --     --     if Diffviewopen == false then
+  --     --       if
+  --     --         vim.api.nvim_get_mode().mode == "v"
+  --     --         or vim.api.nvim_get_mode().mode == "V"
+  --     --       then
+  --     --         local start_row
+  --     --         local end_row
+  --     --         _, start_row, _, _ = unpack(vim.fn.getpos("'<"))
+  --     --         _, end_row, _, _ = unpack(vim.fn.getpos("'>"))
+  --     --         local cmd = "DiffviewFileHistory -L"
+  --     --           .. start_row
+  --     --           .. ","
+  --     --           .. end_row
+  --     --           .. ":"
+  --     --           .. vim.api.nvim_buf_get_name(0)
+  --     --         vim.cmd(cmd)
+  --     --       else
+  --     --         vim.cmd("DiffviewFileHistory")
+  --     --       end
+  --     --       Diffviewopen = true
+  --     --     else
+  --     --       vim.cmd("DiffviewClose")
+  --     --       Diffviewopen = false
+  --     --     end
+  --     --   end,
+  --     --   desc = "code actions",
+  --     --   mode = { "v", "n" },
+  --     -- },
+  --   },
+  -- },
 }
