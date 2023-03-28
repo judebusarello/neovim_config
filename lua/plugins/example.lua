@@ -27,6 +27,7 @@ return {
   { "hrsh7th/cmp-path", enabled = false }, -- I don't use filesystem paths frequently. More likely to mess me up than help me out.
   { "saadparwaiz1/cmp_luasnip", enabled = false }, -- I don't use luasnip. No need to have it for autocomplete
   { "ggandor/leap.nvim", enabled = true }, -- I don't use easymotions
+  { "rmagatti/auto-session", enabled = true }, -- I don't use easymotions
   { "Bekaboo/deadcolumn.nvim", enabled = true }, -- show colorcolumn as you approach
   -- { "anuvyklack/pretty-fold.nvim", enabled = true }, -- I don't use easymotions
 
@@ -243,13 +244,18 @@ return {
           null_ls.builtins.formatting.prettier,
           null_ls.builtins.formatting.isort,
           null_ls.builtins.formatting.jq,
-          null_ls.builtins.formatting.shfmt,
           null_ls.builtins.formatting.buildifier,
+          null_ls.builtins.formatting.sql_formatter, -- not sure this is working
+          -- null_ls.builtins.formatting.google_java_format, --not sure if this works? Not even sure if this is right to use in our code.
           null_ls.builtins.diagnostics.eslint,
           null_ls.builtins.diagnostics.pyright,
+          null_ls.builtins.diagnostics.vulture,
           null_ls.builtins.completion.spell,
           null_ls.builtins.code_actions.gitsigns,
           null_ls.builtins.code_actions.refactoring,
+          -- null_ls.builtins.formatting.sqlfluff.with({
+          --   extra_args = { "--dialect", "postgres" },
+          -- }),
         },
       })
     end,
@@ -314,6 +320,22 @@ return {
         "nvim-telescope/telescope-fzf-native.nvim",
         build = "make",
         lazy = false,
+      },
+      {
+        "nvim-telescope/telescope-frecency.nvim",
+        dependencies = {
+          "kkharji/sqlite.lua",
+        },
+        opts = {
+          extensions = {
+            frecency = {
+              show_scores = false,
+              show_unindexed = true,
+              ignore_patterns = { "*.git/*" },
+              disable_devicons = false,
+            },
+          },
+        },
       },
     },
     opts = {
@@ -384,6 +406,7 @@ return {
         telescope.load_extension("undo")
         telescope.load_extension("project")
         telescope.load_extension("file_browser")
+        telescope.load_extension("frecency")
       end,
     },
     keys = {
@@ -397,7 +420,7 @@ return {
       {
         "<leader>f",
         function()
-          require("telescope.builtin").oldfiles()
+          require("telescope").extensions.frecency.frecency()
         end,
         desc = "recently used files",
       },
