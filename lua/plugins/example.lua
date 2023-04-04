@@ -3,6 +3,9 @@ vim.opt.diffopt:append("filler")
 vim.opt.diffopt:append("algorithm:histogram")
 vim.opt.diffopt:append("indent-heuristic")
 vim.opt.colorcolumn = "80"
+vim.opt.swapfile = false
+vim.opt.cursorline = true
+vim.opt.cursorlineopt = "number"
 
 _G.Diffviewopen = false
 
@@ -29,6 +32,8 @@ return {
   { "ggandor/leap.nvim", enabled = true }, -- I don't use easymotions
   { "rmagatti/auto-session", enabled = true }, -- I don't use easymotions
   { "Bekaboo/deadcolumn.nvim", enabled = true }, -- show colorcolumn as you approach
+  { "windwp/nvim-autopairs", enabled = true }, -- This seems like I can make this work how I want
+  -- { "pocco81/auto-save.nvim", enabled = true }, -- This seems like I can make this work how I want
   -- { "anuvyklack/pretty-fold.nvim", enabled = true }, -- I don't use easymotions
 
   -- { "projekt0n/circles.nvim", enabled = true,
@@ -306,6 +311,27 @@ return {
       },
     },
   },
+  -- not Working. It will show you and store clipboard yanks
+  -- {
+  --   "AckslD/nvim-neoclip.lua",
+  --   enabled = true,
+  --   dependencies = {
+  --     "kkharji/sqlite.lua",
+  --   },
+  --   opts = {
+  --     enable_persistent_history = true,
+  --   },
+  --   keys = {
+  --     {
+  --       "P",
+  --       function()
+  --         require("neoclip")()
+  --       end,
+  --       desc = "delete current buffer",
+  --       mode = "n",
+  --     },
+  --   },
+  -- },
   {
     "nvim-telescope/telescope.nvim",
     enabled = true,
@@ -422,7 +448,7 @@ return {
         function()
           require("telescope").extensions.frecency.frecency()
         end,
-        desc = "recently used files",
+        desc = "frequently used files",
       },
       {
         "<leader>/",
