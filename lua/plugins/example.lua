@@ -30,41 +30,15 @@ return {
   { "hrsh7th/cmp-path", enabled = false }, -- I don't use filesystem paths frequently. More likely to mess me up than help me out.
   { "saadparwaiz1/cmp_luasnip", enabled = false }, -- I don't use luasnip. No need to have it for autocomplete
   { "ggandor/leap.nvim", enabled = true }, -- I don't use easymotions
-  { "rmagatti/auto-session", enabled = true }, -- I don't use easymotions
+  { "rmagatti/auto-session", enabled = false }, -- I don't use easymotions
   { "Bekaboo/deadcolumn.nvim", enabled = true }, -- show colorcolumn as you approach
-  { "windwp/nvim-autopairs", enabled = true }, -- This seems like I can make this work how I want
-  -- { "pocco81/auto-save.nvim", enabled = true }, -- This seems like I can make this work how I want
-  -- { "anuvyklack/pretty-fold.nvim", enabled = true }, -- I don't use easymotions
-
-  -- { "projekt0n/circles.nvim", enabled = true,
-  --   dependencies = {
-  --     "nvim-tree/nvim-web-devicons",
-  --   },
-  -- },
-
+  { "windwp/nvim-autopairs", enabled = false }, -- This seems like I can make this work how I want
   {
-    "rcarriga/nvim-notify",
+    "projekt0n/circles.nvim",
     enabled = true,
-    config = function()
-      local stages = require("notify.stages.fade")("top_down")
-      local notify = require("notify")
-
-      notify.setup({
-        render = "minimal",
-        stages = {
-          function(...)
-            local opts = stages[1](...)
-            if opts then
-              opts.border = "none"
-              opts.row = opts.row + 1
-            end
-            return opts
-          end,
-          unpack(stages, 2),
-        },
-        timeout = 0,
-      })
-    end,
+    dependencies = {
+      "nvim-tree/nvim-web-devicons",
+    },
   },
   {
     "nvim-treesitter",
@@ -150,16 +124,24 @@ return {
       {
         "<leader>j",
         function()
-          local Terminal = require("toggleterm.terminal").Terminal
-          local term1 = Terminal:new({})
-          term1:toggle()
+          require("toggleterm").toggle(1, 0, vim.loop.cwd(), "float")
         end,
         desc = "open scratch terminal",
         mode = "n",
       },
       {
         "<leader>k",
-        vim.cmd.ToggleTerm,
+        function()
+          require("toggleterm").toggle(2, 0, vim.loop.cwd(), "float")
+        end,
+        desc = "open scratch terminal",
+        mode = "n",
+      },
+      {
+        "<leader>l",
+        function()
+          require("toggleterm").toggle(2, 0, vim.loop.cwd(), "float")
+        end,
         desc = "open scratch terminal",
         mode = "n",
       },
@@ -288,9 +270,9 @@ return {
     opts = {
       options = {
         diagnostics = false,
-        show_close_icon = false,
+        show_close_icon = true,
         separator_style = "slant",
-        always_show_bufferline = true,
+        always_show_bufferline = false,
       },
     },
     keys = {
@@ -311,109 +293,54 @@ return {
       },
     },
   },
-  -- not Working. It will show you and store clipboard yanks
-  -- {
-  --   "AckslD/nvim-neoclip.lua",
-  --   enabled = true,
-  --   dependencies = {
-  --     "kkharji/sqlite.lua",
-  --   },
-  --   opts = {
-  --     enable_persistent_history = true,
-  --   },
-  --   keys = {
-  --     {
-  --       "P",
-  --       function()
-  --         require("neoclip")()
-  --       end,
-  --       desc = "delete current buffer",
-  --       mode = "n",
-  --     },
-  --   },
-  -- },
   {
     "nvim-telescope/telescope.nvim",
     enabled = true,
     dependencies = {
       "nvim-lua/plenary.nvim",
-      "debugloop/telescope-undo.nvim",
-      "nvim-telescope/telescope-github.nvim",
-      "nvim-telescope/telescope-project.nvim",
       "nvim-telescope/telescope-file-browser.nvim",
-      "nvim-telescope/telescope-fzf-writer.nvim",
-      {
-        "nvim-telescope/telescope-fzf-native.nvim",
-        build = "make",
-        lazy = false,
-      },
-      {
-        "nvim-telescope/telescope-frecency.nvim",
-        dependencies = {
-          "kkharji/sqlite.lua",
-        },
-        opts = {
-          extensions = {
-            frecency = {
-              show_scores = false,
-              show_unindexed = true,
-              ignore_patterns = { "*.git/*" },
-              disable_devicons = false,
-            },
-          },
-        },
-      },
     },
     opts = {
       defaults = {
+        vimgrep_arguments = {
+          "rg",
+          "-L",
+          "--color=never",
+          "--no-heading",
+          "--with-filename",
+          "--line-number",
+          "--column",
+          "--smart-case",
+        },
         prompt_prefix = " ",
         selection_caret = " ",
         layout_strategy = "horizontal",
         layout_config = {
           horizontal = {
-            preview_width = 0.55,
-            results_width = 0.8,
+            preview_width = 0.35,
+            results_width = 0.65,
           },
-          height = 0.9,
-          width = 0.87,
-          preview_cutoff = 120,
+          height = 0.6,
+          width = 0.75,
+          preview_cutoff = 80,
         },
       },
       extensions = {
-        fzf_writer = {
-          minimum_grep_characters = 2,
-          minimum_files_characters = 2,
-
-          -- Disabled by default.
-          -- Will probably slow down some aspects of the sorter, but can make color highlights.
-          -- I will work on this more later.
-          use_highlighter = true,
-        },
-        fzf = {
-          fuzzy = true,
-          override_generic_sorter = true,
-          override_file_sorter = true,
-          case_mode = "smart_case",
-        },
-        undo = {
-          use_delta = true,
-          side_by_side = true,
-          layout_strategy = "horizontal",
-        },
-        project = {
-          base_dirs = {
-            "~/vistar",
-            "~/docker-compose",
-          },
-          hidden_files = true,
-          theme = "dropdown",
-          order_by = "asc",
-          search_by = "title",
-        },
         file_browser = {
-          theme = "ivy",
-          -- disables netrw and use telescope-file-browser in its place
-          hijack_netrw = true,
+          cwd_to_path = false,
+          grouped = false,
+          files = true,
+          add_dirs = true,
+          auto_depth = true,
+          hidden = { file_browser = false, folder_browser = false },
+          collapse_dirs = false,
+          prompt_path = false,
+          quiet = false,
+          dir_icon = "",
+          dir_icon_hl = "Default",
+          display_stat = { date = true, size = true, mode = true },
+          use_fd = true,
+          git_status = true,
           mappings = {
             ["i"] = {
               -- your custom insert mode mappings
@@ -426,30 +353,10 @@ return {
       },
       config = function()
         local telescope = require("telescope")
-        telescope.load_extension("gh")
-        telescope.load_extension("fzf")
-        telescope.load_extension("fzf_writer")
-        telescope.load_extension("undo")
-        telescope.load_extension("project")
         telescope.load_extension("file_browser")
-        telescope.load_extension("frecency")
       end,
     },
     keys = {
-      {
-        "<leader>GG",
-        function()
-          require("telescope").extensions.gh.gist()
-        end,
-        desc = "recently used files",
-      },
-      {
-        "<leader>f",
-        function()
-          require("telescope").extensions.frecency.frecency()
-        end,
-        desc = "frequently used files",
-      },
       {
         "<leader>/",
         function()
@@ -472,13 +379,6 @@ return {
         desc = "commits to the file in this buffer",
       },
       {
-        "<leader>u",
-        function()
-          require("telescope").extensions.undo.undo()
-        end,
-        desc = "telescope undo",
-      },
-      {
         "<leader>e",
         function()
           require("telescope").extensions.file_browser.file_browser({
@@ -487,21 +387,6 @@ return {
         end,
         desc = "file browser for current folder",
       },
-      {
-        "<leader>p",
-        function()
-          require("telescope").extensions.project.project({})
-        end,
-        desc = "project picker",
-      },
-      -- let's find a way to do all my git stuff with lazygit
-      -- {
-      --   "<leader>i",
-      --   function()
-      --     require("telescope.builtin").git_status()
-      --   end,
-      --   desc = "files staged in git",
-      -- },
     },
   },
   {
@@ -526,130 +411,4 @@ return {
       },
     },
   },
-  -- {
-  --   "sindrets/diffview.nvim",
-  --   enabled = true,
-  --   opts = {
-  --     enhanced_diff_hl = true,
-  --     show_help_hints = false,
-  --     view = {
-  --       -- Configure the layout and behavior of different types of views.
-  --       -- Available layouts:
-  --       --  'diff1_plain'
-  --       --    |'diff2_horizontal'
-  --       --    |'diff2_vertical'
-  --       --    |'diff3_horizontal'
-  --       --    |'diff3_vertical'
-  --       --    |'diff3_mixed'
-  --       --    |'diff4_mixed'
-  --       -- For more info, see |diffview-config-view.x.layout|.
-  --       default = {
-  --         -- Config for changed files, and staged files in diff views.
-  --         layout = "diff2_horizontal",
-  --         winbar_info = false, -- See |diffview-config-view.x.winbar_info|
-  --       },
-  --       merge_tool = {
-  --         -- Config for conflicted files in diff views during a merge or rebase.
-  --         layout = "diff3_horizontal",
-  --         disable_diagnostics = true, -- Temporarily disable diagnostics for conflict buffers while in the view.
-  --         winbar_info = true, -- See |diffview-config-view.x.winbar_info|
-  --       },
-  --       file_history = {
-  --         -- Config for changed files in file history views.
-  --         layout = "diff2_horizontal",
-  --         winbar_info = false, -- See |diffview-config-view.x.winbar_info|
-  --       },
-  --     },
-  --     file_panel = {
-  --       listing_style = "tree", -- One of 'list' or 'tree'
-  --       tree_options = { -- Only applies when listing_style is 'tree'
-  --         flatten_dirs = true, -- Flatten dirs that only contain one single dir
-  --         folder_statuses = "only_folded", -- One of 'never', 'only_folded' or 'always'.
-  --       },
-  --       win_config = { -- See |diffview-config-win_config|
-  --         position = "left",
-  --         width = 35,
-  --         win_opts = {},
-  --       },
-  --     },
-  --     file_history_panel = {
-  --       log_options = { -- See |diffview-config-log_options|
-  --         git = {
-  --           single_file = {
-  --             diff_merges = "combined",
-  --           },
-  --           multi_file = {
-  --             diff_merges = "first-parent",
-  --           },
-  --         },
-  --         hg = {
-  --           single_file = {},
-  --           multi_file = {},
-  --         },
-  --       },
-  --       win_config = { -- See |diffview-config-win_config|
-  --         position = "bottom",
-  --         height = 16,
-  --         win_opts = {},
-  --       },
-  --     },
-  --     commit_log_panel = {
-  --       win_config = {}, -- See |diffview-config-win_config|
-  --     },
-  --     default_args = { -- Default args prepended to the arg-list for the listed commands
-  --       DiffviewOpen = {},
-  --       DiffviewFileHistory = {},
-  --     },
-  --   },
-  --   keys = {
-  --     {
-  --       "<leader>D",
-  --       function()
-  --         local cursor_pos = vim.fn.getpos(".")
-  --         if Diffviewopen == false then
-  --           vim.cmd("DiffviewFileHistory")
-  --           vim.cmd("DiffviewToggleFiles")
-  --           Diffviewopen = true
-  --         else
-  --           vim.cmd("DiffviewClose")
-  --           Diffviewopen = false
-  --         end
-  --         vim.fn.setpos(".", cursor_pos)
-  --       end,
-  --       desc = "code actions",
-  --       mode = "n",
-  --     },
-  --     -- {
-  --     --   "<leader>d",
-  --     --   function()
-  --     --     if Diffviewopen == false then
-  --     --       if
-  --     --         vim.api.nvim_get_mode().mode == "v"
-  --     --         or vim.api.nvim_get_mode().mode == "V"
-  --     --       then
-  --     --         local start_row
-  --     --         local end_row
-  --     --         _, start_row, _, _ = unpack(vim.fn.getpos("'<"))
-  --     --         _, end_row, _, _ = unpack(vim.fn.getpos("'>"))
-  --     --         local cmd = "DiffviewFileHistory -L"
-  --     --           .. start_row
-  --     --           .. ","
-  --     --           .. end_row
-  --     --           .. ":"
-  --     --           .. vim.api.nvim_buf_get_name(0)
-  --     --         vim.cmd(cmd)
-  --     --       else
-  --     --         vim.cmd("DiffviewFileHistory")
-  --     --       end
-  --     --       Diffviewopen = true
-  --     --     else
-  --     --       vim.cmd("DiffviewClose")
-  --     --       Diffviewopen = false
-  --     --     end
-  --     --   end,
-  --     --   desc = "code actions",
-  --     --   mode = { "v", "n" },
-  --     -- },
-  --   },
-  -- },
 }
