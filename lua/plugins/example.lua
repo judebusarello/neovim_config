@@ -15,7 +15,7 @@ return {
   { "folke/trouble.nvim",            enabled = true },
   { "folke/zen-mode.nvim",           enabled = true },
   { "folke/flash.nvim",              enabled = false },
-  { "kdheepak/lazygit.nvim",         enabled = true },
+  { "kdheepak/lazygit.nvim",         enabled = false },
   { "goolord/alpha-nvim",            enabled = false }, -- Welcome screen
   { "echasnovski/mini.pairs",        enabled = false }, -- This autotypes paired bracus
   { "echasnovski/mini.pairs",        enabled = false }, -- This autotypes paired bracus
@@ -23,16 +23,16 @@ return {
   { "folke/neodev.nvim",             enabled = false },
   { "nvim-lualine/lualine.nvim",     enabled = false }, -- don't like statuslines
   { "echasnovski/mini.indentscope",  enabled = false }, -- the animated scope lines were distracting
-  { "L3MON4D3/LuaSnip",              enabled = false }, -- Dunno what I'm doing with this
+  { "L3MON4D3/LuaSnip",              enabled = true },  -- Dunno what I'm doing with this
   { "SmiteshP/nvim-navic",           enabled = false }, -- This shows data in the statusbar that I don't have
   { "folke/trouble.nvim",            enabled = false }, -- this is a list of all the diagnostic errors etc. Don't use it
   { "RRethy/vim-illuminate",         enabled = false }, -- underlines all the same words as under the cursor. I find this distracting.
   { "hrsh7th/cmp-buffer",            enabled = false }, -- I don't want autocomplete to come from random words in the buffer
   { "hrsh7th/cmp-path",              enabled = false }, -- I don't use filesystem paths frequently. More likely to mess me up than help me out.
-  { "saadparwaiz1/cmp_luasnip",      enabled = false }, -- I don't use luasnip. No need to have it for autocomplete
-  { "ggandor/leap.nvim",             enabled = true }, -- I don't use easymotions
+  { "saadparwaiz1/cmp_luasnip",      enabled = true },  -- I don't use luasnip. No need to have it for autocomplete
+  { "ggandor/leap.nvim",             enabled = true },  -- I don't use easymotions
   { "rmagatti/auto-session",         enabled = false }, -- I don't use easymotions
-  { "Bekaboo/deadcolumn.nvim",       enabled = true }, -- show colorcolumn as you approach
+  { "Bekaboo/deadcolumn.nvim",       enabled = true },  -- show colorcolumn as you approach
   { "windwp/nvim-autopairs",         enabled = false }, -- This seems like I can make this work how I want
   { "junegunn/fzf",                  build = "./install --bin" },
   { "nvim-telescope/telescope.nvim", enabled = false },
@@ -50,10 +50,10 @@ return {
             -- hidden = "hidden",
             border = "noborder",
             wrap = "wrap",
-            scrollbar = false,
-            layout = "vertical",
+            scrollbar = true,
+            layout = "horizontal",
             title = false,
-            vertical = "up:80%",
+            horizontal = "left:40%",
           },
         },
       })
@@ -204,14 +204,6 @@ return {
         desc = "open scratch terminal",
         mode = "n",
       },
-      -- {
-      --   "<leader>l",
-      --   function()
-      --     require("toggleterm").toggle(2, 0, vim.loop.cwd(), "float")
-      --   end,
-      --   desc = "open scratch terminal",
-      --   mode = "n",
-      -- },
       {
         "<leader>mm",
         function()
@@ -222,36 +214,42 @@ return {
         desc = "open spotify cli",
         mode = "n",
       },
-      -- {
-      --   "<leader>dd",
-      --   function()
-      --     local Terminal = require("toggleterm.terminal").Terminal
-      --     local lazydocker = Terminal:new({ cmd = "lazydocker", hidden = true })
-      --     lazydocker:toggle()
-      --   end,
-      --   desc = "open lazydocker",
-      --   mode = "n",
-      -- },
-      -- {
-      --   "<leader>G",
-      --   function()
-      --     vim.cmd([[
-      --     if has('nvim') && executable('nvr')
-      --       let $GIT_EDITOR = "nvr -cc split --remote-wait +'set bufhidden=wipe'"
-      --     endif
-      --     ]])
-      --     local Terminal = require("toggleterm.terminal").Terminal
-      --     local lazygit = Terminal:new({
-      --       cmd = "lazygit",
-      --       hidden = true,
-      --       direction = "float",
-      --       start_in_insert = true,
-      --     })
-      --     lazygit:toggle()
-      --   end,
-      --   desc = "open lazygit",
-      --   mode = "n",
-      -- },
+      {
+        "<S-esc>",
+        function()
+          require("toggleterm").toggle(2, 0, vim.loop.cwd(), "float")
+        end,
+        desc = "close terminal",
+        mode = "n",
+      },
+      {
+        "<S-esc>",
+        function()
+          require("toggleterm").toggle(2, 0, vim.loop.cwd(), "float")
+        end,
+        desc = "close terminal",
+        mode = "t",
+      },
+      {
+        "<leader>g",
+        function()
+          vim.cmd([[
+          if has('nvim') && executable('nvr')
+            let $GIT_EDITOR = "nvr -cc split --remote-wait +'set bufhidden=wipe'"
+          endif
+          ]])
+          local Terminal = require("toggleterm.terminal").Terminal
+          local lazygit = Terminal:new({
+            cmd = "lazygit",
+            hidden = true,
+            direction = "float",
+            start_in_insert = true,
+          })
+          lazygit:toggle()
+        end,
+        desc = "open lazygit",
+        mode = "n",
+      },
     },
   },
   {
@@ -259,26 +257,50 @@ return {
     enabled = true,
     config = function()
       local cmp = require("cmp")
+      local has_words_before = function()
+        if vim.api.nvim_buf_get_option(0, "buftype") == "prompt" then return false end
+        local line, col = unpack(vim.api.nvim_win_get_cursor(0))
+        return col ~= 0 and vim.api.nvim_buf_get_text(0, line - 1, 0, line - 1, col, {})[1]:match("^%s*$") == nil
+      end
       cmp.setup({
+        sorting = {
+          priority_weight = 2,
+          comparators = {
+            require("copilot_cmp.comparators").prioritize,
+
+            -- Below is the default comparitor list and order for nvim-cmp
+            cmp.config.compare.offset,
+            -- cmp.config.compare.scopes, --this is commented in nvim-cmp too
+            cmp.config.compare.exact,
+            cmp.config.compare.score,
+            cmp.config.compare.recently_used,
+            cmp.config.compare.locality,
+            cmp.config.compare.kind,
+            cmp.config.compare.sort_text,
+            cmp.config.compare.length,
+            cmp.config.compare.order,
+          },
+        },
         mapping = cmp.mapping.preset.insert({
           [";"] = cmp.mapping.confirm({ select = true }),
-          ["<Tab>"] = cmp.mapping(function(fallback)
-            if cmp.visible() then
-              cmp.select_next_item()
+          ["<Tab>"] = vim.schedule_wrap(function(fallback)
+            if cmp.visible() and has_words_before() then
+              cmp.select_next_item({ behavior = cmp.SelectBehavior.Select })
             else
               fallback()
             end
-          end, { "i", "s" }),
-          ["<S-Tab>"] = cmp.mapping(function(fallback)
-            if cmp.visible() then
-              cmp.select_prev_item()
+          end),
+          ["S-<Tab>"] = vim.schedule_wrap(function(fallback)
+            if cmp.visible() and has_words_before() then
+              cmp.select_prev_item({ behavior = cmp.SelectBehavior.Select })
             else
               fallback()
             end
-          end, { "i", "s" }),
+          end),
         }),
         sources = cmp.config.sources({
-          { name = "nvim_lsp" },
+          { name = "copilot",  group_index = 2 },
+          { name = "nvim_lsp", group_index = 2 },
         }, {
           { name = "buffer" },
           { name = "spell" },
