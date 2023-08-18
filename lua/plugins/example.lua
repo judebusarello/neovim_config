@@ -10,34 +10,101 @@ vim.opt.cursorlineopt = "number"
 _G.Diffviewopen = false
 
 return {
-  { "catppuccin/nvim", name = "catppuccin" },
-  { "HiPhish/nvim-ts-rainbow2", enabled = true }, -- colorize parens and brackets
-  { "folke/trouble.nvim", enabled = true },
-  { "folke/zen-mode.nvim", enabled = true },
-  { "kdheepak/lazygit.nvim", enabled = true },
-  { "goolord/alpha-nvim", enabled = false }, -- Welcome screen
-  { "echasnovski/mini.pairs", enabled = false }, -- This autotypes paired bracus
-  { "echasnovski/mini.pairs", enabled = false }, -- This autotypes paired bracus
-  { "nvim-neo-tree/neo-tree.nvim", enabled = false }, -- I prefer the telescope extension for this stuff
-  { "folke/neodev.nvim", enabled = false },
-  { "nvim-lualine/lualine.nvim", enabled = false }, -- don't like statuslines
-  { "echasnovski/mini.indentscope", enabled = false }, -- the animated scope lines were distracting
-  { "L3MON4D3/LuaSnip", enabled = false }, -- Dunno what I'm doing with this
-  { "SmiteshP/nvim-navic", enabled = false }, -- This shows data in the statusbar that I don't have
-  { "folke/trouble.nvim", enabled = false }, -- this is a list of all the diagnostic errors etc. Don't use it
-  { "RRethy/vim-illuminate", enabled = false }, -- underlines all the same words as under the cursor. I find this distracting.
-  { "hrsh7th/cmp-buffer", enabled = false }, -- I don't want autocomplete to come from random words in the buffer
-  { "hrsh7th/cmp-path", enabled = false }, -- I don't use filesystem paths frequently. More likely to mess me up than help me out.
-  { "saadparwaiz1/cmp_luasnip", enabled = false }, -- I don't use luasnip. No need to have it for autocomplete
-  { "ggandor/leap.nvim", enabled = true }, -- I don't use easymotions
-  { "rmagatti/auto-session", enabled = false }, -- I don't use easymotions
-  { "Bekaboo/deadcolumn.nvim", enabled = true }, -- show colorcolumn as you approach
-  { "windwp/nvim-autopairs", enabled = false }, -- This seems like I can make this work how I want
+  { "catppuccin/nvim",               name = "catppuccin" },
+  { "HiPhish/nvim-ts-rainbow2",      enabled = true }, -- colorize parens and brackets
+  { "folke/trouble.nvim",            enabled = true },
+  { "folke/zen-mode.nvim",           enabled = true },
+  { "folke/flash.nvim",              enabled = false },
+  { "kdheepak/lazygit.nvim",         enabled = true },
+  { "goolord/alpha-nvim",            enabled = false }, -- Welcome screen
+  { "echasnovski/mini.pairs",        enabled = false }, -- This autotypes paired bracus
+  { "echasnovski/mini.pairs",        enabled = false }, -- This autotypes paired bracus
+  { "nvim-neo-tree/neo-tree.nvim",   enabled = false }, -- I prefer the telescope extension for this stuff
+  { "folke/neodev.nvim",             enabled = false },
+  { "nvim-lualine/lualine.nvim",     enabled = false }, -- don't like statuslines
+  { "echasnovski/mini.indentscope",  enabled = false }, -- the animated scope lines were distracting
+  { "L3MON4D3/LuaSnip",              enabled = false }, -- Dunno what I'm doing with this
+  { "SmiteshP/nvim-navic",           enabled = false }, -- This shows data in the statusbar that I don't have
+  { "folke/trouble.nvim",            enabled = false }, -- this is a list of all the diagnostic errors etc. Don't use it
+  { "RRethy/vim-illuminate",         enabled = false }, -- underlines all the same words as under the cursor. I find this distracting.
+  { "hrsh7th/cmp-buffer",            enabled = false }, -- I don't want autocomplete to come from random words in the buffer
+  { "hrsh7th/cmp-path",              enabled = false }, -- I don't use filesystem paths frequently. More likely to mess me up than help me out.
+  { "saadparwaiz1/cmp_luasnip",      enabled = false }, -- I don't use luasnip. No need to have it for autocomplete
+  { "ggandor/leap.nvim",             enabled = true }, -- I don't use easymotions
+  { "rmagatti/auto-session",         enabled = false }, -- I don't use easymotions
+  { "Bekaboo/deadcolumn.nvim",       enabled = true }, -- show colorcolumn as you approach
+  { "windwp/nvim-autopairs",         enabled = false }, -- This seems like I can make this work how I want
+  { "junegunn/fzf",                  build = "./install --bin" },
+  { "nvim-telescope/telescope.nvim", enabled = false },
   {
-    "projekt0n/circles.nvim",
-    enabled = true,
-    dependencies = {
-      "nvim-tree/nvim-web-devicons",
+    "ibhagwan/fzf-lua",
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    config = function()
+      require("fzf-lua").setup({
+        "max-perf",
+        winopts = {
+          border = "FloatBorder",
+          width = 0.8,
+          height = 0.7,
+          preview = {
+            -- hidden = "hidden",
+            border = "noborder",
+            wrap = "wrap",
+            scrollbar = false,
+            layout = "vertical",
+            title = false,
+            vertical = "up:80%",
+          },
+        },
+      })
+    end,
+    keys = {
+      {
+        "<leader><leader>",
+        function()
+          require("fzf-lua").git_files({ multiprocess = true })
+        end,
+        mode = "n",
+      },
+      {
+        "<leader>e",
+        function()
+          local current_buf = vim.api.nvim_buf_get_name(0)
+          require("fzf-lua").files({
+            cwd = current_buf,
+            multiprocess = true,
+          })
+        end,
+        mode = "n",
+      },
+      {
+        "<leader>f",
+        function()
+          require("fzf-lua").grep_visual({ multiprocess = true })
+        end,
+        mode = "v",
+      },
+      {
+        "<leader>f",
+        function()
+          require("fzf-lua").lsp_finder({ multiprocess = true })
+        end,
+        mode = "n",
+      },
+      {
+        "<leader>o",
+        function()
+          require("fzf-lua").oldfiles({ multiprocess = true })
+        end,
+        mode = "n",
+      },
+      {
+        "<leader>/",
+        function()
+          require("fzf-lua").grep_project({ multiprocess = true })
+        end,
+        mode = "n",
+      },
     },
   },
   {
@@ -54,12 +121,12 @@ return {
     enabled = true,
     opts = {
       messages = {
-        enabled = true, -- enables the Noice messages UI
-        view = "mini", -- default view for messages
-        view_error = "mini", -- view for errors
-        view_warn = "mini", -- view for warnings
+        enabled = true,            -- enables the Noice messages UI
+        view = "mini",             -- default view for messages
+        view_error = "mini",       -- view for errors
+        view_warn = "mini",        -- view for warnings
         view_history = "messages", -- view for :messages
-        view_search = false, -- view for search count messages. Set to `false` to disable
+        view_search = false,       -- view for search count messages. Set to `false` to disable
       },
       views = {
         cmdline_popup = {
@@ -137,14 +204,14 @@ return {
         desc = "open scratch terminal",
         mode = "n",
       },
-      {
-        "<leader>l",
-        function()
-          require("toggleterm").toggle(2, 0, vim.loop.cwd(), "float")
-        end,
-        desc = "open scratch terminal",
-        mode = "n",
-      },
+      -- {
+      --   "<leader>l",
+      --   function()
+      --     require("toggleterm").toggle(2, 0, vim.loop.cwd(), "float")
+      --   end,
+      --   desc = "open scratch terminal",
+      --   mode = "n",
+      -- },
       {
         "<leader>mm",
         function()
@@ -220,29 +287,66 @@ return {
     end,
   },
   {
+    "zbirenbaum/copilot.lua",
+    cmd = "Copilot",
+    build = ":Copilot auth",
+    opts = {
+      suggestion = { enabled = false },
+      panel = { enabled = false },
+      filetypes = {
+        markdown = true,
+        python = true,
+        javascript = true,
+        typescript = true,
+        help = true,
+      },
+    },
+  },
+  {
+    "zbirenbaum/copilot-cmp",
+    dependencies = "copilot.lua",
+    opts = {},
+    config = function(_, opts)
+      local copilot_cmp = require("copilot_cmp")
+      copilot_cmp.setup(opts)
+      -- attach cmp source whenever copilot attaches
+      -- fixes lazy-loading issues with the copilot cmp source
+      require("lazyvim.util").on_attach(function(client)
+        if client.name == "copilot" then
+          copilot_cmp._on_insert_enter({})
+        end
+      end)
+    end,
+  },
+  {
+    "williamboman/mason.nvim",
+    opts = function(_, opts)
+      table.insert(opts.ensure_installed, "prettier")
+      table.insert(opts.ensure_installed, "buildifier")
+      table.insert(opts.ensure_installed, "gopls")
+      table.insert(opts.ensure_installed, "json-lsp")
+      table.insert(opts.ensure_installed, "lua-language-server")
+      table.insert(opts.ensure_installed, "python-lsp-server")
+      table.insert(opts.ensure_installed, "typescript-language-server")
+      table.insert(opts.ensure_installed, "yapf")
+      table.insert(opts.ensure_installed, "isort")
+    end,
+  },
+  {
     "jose-elias-alvarez/null-ls.nvim",
-    enabled = true,
     config = function()
       local null_ls = require("null-ls")
       null_ls.setup({
         sources = {
           null_ls.builtins.formatting.yapf,
-          null_ls.builtins.formatting.stylua,
+          null_ls.builtins.formatting.gopls,
           null_ls.builtins.formatting.prettier,
           null_ls.builtins.formatting.isort,
           null_ls.builtins.formatting.jq,
           null_ls.builtins.formatting.buildifier,
-          null_ls.builtins.formatting.sql_formatter, -- not sure this is working
-          -- null_ls.builtins.formatting.google_java_format, --not sure if this works? Not even sure if this is right to use in our code.
-          null_ls.builtins.diagnostics.eslint,
-          null_ls.builtins.diagnostics.pyright,
-          null_ls.builtins.diagnostics.vulture,
           null_ls.builtins.completion.spell,
           null_ls.builtins.code_actions.gitsigns,
           null_ls.builtins.code_actions.refactoring,
-          -- null_ls.builtins.formatting.sqlfluff.with({
-          --   extra_args = { "--dialect", "postgres" },
-          -- }),
         },
       })
     end,
@@ -255,7 +359,6 @@ return {
       },
     },
   },
-
   {
     "LazyVim/LazyVim",
     enabled = true,
@@ -290,102 +393,6 @@ return {
           vim.cmd([[b#]])
         end,
         desc = "undo delete current buffer",
-      },
-    },
-  },
-  {
-    "nvim-telescope/telescope.nvim",
-    enabled = true,
-    dependencies = {
-      "nvim-lua/plenary.nvim",
-      "nvim-telescope/telescope-file-browser.nvim",
-    },
-    opts = {
-      defaults = {
-        vimgrep_arguments = {
-          "rg",
-          "-L",
-          "--color=never",
-          "--no-heading",
-          "--with-filename",
-          "--line-number",
-          "--column",
-          "--smart-case",
-        },
-        prompt_prefix = " ",
-        selection_caret = " ",
-        layout_strategy = "horizontal",
-        layout_config = {
-          horizontal = {
-            preview_width = 0.35,
-            results_width = 0.65,
-          },
-          height = 0.6,
-          width = 0.75,
-          preview_cutoff = 80,
-        },
-      },
-      extensions = {
-        file_browser = {
-          cwd_to_path = false,
-          grouped = false,
-          files = true,
-          add_dirs = true,
-          auto_depth = true,
-          hidden = { file_browser = false, folder_browser = false },
-          collapse_dirs = false,
-          prompt_path = false,
-          quiet = false,
-          dir_icon = "",
-          dir_icon_hl = "Default",
-          display_stat = { date = true, size = true, mode = true },
-          use_fd = true,
-          git_status = true,
-          mappings = {
-            ["i"] = {
-              -- your custom insert mode mappings
-            },
-            ["n"] = {
-              -- your custom normal mode mappings
-            },
-          },
-        },
-      },
-      config = function()
-        local telescope = require("telescope")
-        telescope.load_extension("file_browser")
-      end,
-    },
-    keys = {
-      {
-        "<leader>/",
-        function()
-          -- require("telescope").extensions.fzf_writer.grep()
-          require("telescope.builtin").live_grep()
-          -- require("telescope.builtin").grep_string({
-          --   shorten_path = true,
-          --   word_match = "-w",
-          --   only_sort_text = true,
-          --   search = "",
-          -- })
-        end,
-        desc = "fuzzy find all files in repo",
-      },
-      {
-        "<leader>n",
-        function()
-          require("telescope.builtin").git_bcommits()
-        end,
-        desc = "commits to the file in this buffer",
-      },
-      {
-        "<leader>e",
-        function()
-          require("telescope").extensions.file_browser.file_browser({
-            cwd = vim.fn.expand("%:p:h"),
-          })
-        end,
-        desc = "file browser for current folder",
       },
     },
   },
