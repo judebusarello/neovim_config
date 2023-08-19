@@ -421,7 +421,7 @@ return {
       {
         "<leader>D",
         function()
-          require("gitsigns").diffthis("HEAD~1")
+          require("gitsigns").diffthis()
         end,
         desc = "see what changed on that line based on the changes made",
         mode = "n",
@@ -445,7 +445,6 @@ return {
       {
         "<leader>b",
         function()
-          require('gitsigns').change_base('HEAD~1')
           require("gitsigns").blame_line({ full = true })
         end,
         desc = "show to commit message of the current line",
@@ -454,6 +453,7 @@ return {
     },
     config = function()
       require("gitsigns").setup({
+        base = "HEAD~1",
         preview_config = {
           -- Options passed to nvim_open_win
           border = 'single',
