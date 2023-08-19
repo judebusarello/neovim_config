@@ -14,9 +14,12 @@ return {
   { "HiPhish/nvim-ts-rainbow2",            enabled = true },  -- colorize parens and brackets
   { "Bekaboo/deadcolumn.nvim",             enabled = true },  -- show colorcolumn as you approach
   { "lukas-reineke/indent-blankline.nvim", enabled = true },  -- show colorcolumn as you approach
+  { "echasnovski/mini.comment",            enabled = true },  --comment out visual selection
   { "L3MON4D3/LuaSnip",                    enabled = false }, -- Dunno what I'm doing with this
-  { "stevearc/dressing",                   enabled = false },
   { "folke/trouble.nvim",                  enabled = false },
+  { "folke/todo-comments.nvim",            enabled = false },
+  { "nvim-lua/plenary.nvim",               enabled = true },
+  { "echasnovski/mini.ai",                 enabled = false }, --don't know how to use
   { "nvim-pack/nvim-spectre.nvim",         enabled = false },
   { "folke/zen-mode.nvim",                 enabled = false },
   { "folke/flash.nvim",                    enabled = false },
@@ -346,6 +349,7 @@ return {
       },
     },
   },
+  { "stevearc/dressing.nvim",            enabled = true }, --this makes the rename dialog appear right over the thing you're renaming instead of the command line
   {
     "jose-elias-alvarez/null-ls.nvim",
     config = function()
@@ -415,21 +419,50 @@ return {
     enabled = true,
     keys = {
       {
-        "<leader>d",
+        "<leader>D",
         function()
           require("gitsigns").diffthis("HEAD~1")
         end,
-        desc = "diff file from previous commit",
+        desc = "see what changed on that line based on the changes made",
         mode = "n",
       },
       {
-        "<leader>h",
+        "<leader>d",
         function()
+          require("gitsigns").preview_hunk_inline()
+        end,
+        desc = "see what changed on that line based on the changes made",
+        mode = "n",
+      },
+      -- {
+      --   "<leader>D", ---dunno if i want this?
+      --   function()
+      --     require("gitsigns").reset_hunk()
+      --   end,
+      --   desc = "reset the hunk to what it use to be",
+      --   mode = "n",
+      -- },
+      {
+        "<leader>b",
+        function()
+          require('gitsigns').change_base('HEAD~1')
           require("gitsigns").blame_line({ full = true })
         end,
         desc = "show to commit message of the current line",
         mode = "n",
       },
     },
-  },
+    config = function()
+      require("gitsigns").setup({
+        preview_config = {
+          -- Options passed to nvim_open_win
+          border = 'single',
+          style = 'minimal',
+          relative = 'cursor',
+          row = 1,
+          col = 1
+        }
+      })
+    end,
+  }
 }
