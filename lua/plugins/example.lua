@@ -15,10 +15,10 @@ return {
   { "Bekaboo/deadcolumn.nvim",             enabled = true },  -- show colorcolumn as you approach
   { "lukas-reineke/indent-blankline.nvim", enabled = true },  -- show colorcolumn as you approach
   { "echasnovski/mini.comment",            enabled = true },  --comment out visual selection
+  { "nvim-lua/plenary.nvim",               enabled = false },
   { "L3MON4D3/LuaSnip",                    enabled = false }, -- Dunno what I'm doing with this
   { "folke/trouble.nvim",                  enabled = false },
   { "folke/todo-comments.nvim",            enabled = false },
-  { "nvim-lua/plenary.nvim",               enabled = true },
   { "echasnovski/mini.ai",                 enabled = false }, --don't know how to use
   { "nvim-pack/nvim-spectre.nvim",         enabled = false },
   { "folke/zen-mode.nvim",                 enabled = false },
@@ -42,6 +42,14 @@ return {
   { "windwp/nvim-autopairs",               enabled = false }, -- This seems like I can make this work how I want
   { "junegunn/fzf",                        build = "./install --bin" },
   { "nvim-telescope/telescope.nvim",       enabled = false },
+  { "jose-elias-alvarez/null-ls.nvim",     enabled = false },
+  {
+    "nvimdev/guard.nvim",
+    enabled = true,
+    opts = {
+      lsp_as_default_formatter = true,
+    }
+  },
   {
     "ibhagwan/fzf-lua",
     dependencies = { "nvim-tree/nvim-web-devicons" },
@@ -351,40 +359,12 @@ return {
   },
   { "stevearc/dressing.nvim",            enabled = true }, --this makes the rename dialog appear right over the thing you're renaming instead of the command line
   {
-    "jose-elias-alvarez/null-ls.nvim",
-    config = function()
-      local null_ls = require("null-ls")
-      null_ls.setup({
-        sources = {
-          null_ls.builtins.formatting.yapf,
-          null_ls.builtins.formatting.gopls,
-          null_ls.builtins.formatting.prettier,
-          null_ls.builtins.formatting.isort,
-          null_ls.builtins.formatting.jq,
-          null_ls.builtins.formatting.buildifier,
-          null_ls.builtins.completion.spell,
-          null_ls.builtins.code_actions.gitsigns,
-          null_ls.builtins.code_actions.refactoring,
-        },
-      })
-    end,
-    keys = {
-      {
-        ";",
-        vim.lsp.buf.code_action,
-        desc = "code actions",
-        mode = "n",
-      },
-    },
-  },
-  {
     "LazyVim/LazyVim",
     enabled = true,
     opts = {
       colorscheme = "catppuccin-mocha",
     },
   },
-
   {
     "akinsho/bufferline.nvim",
     enabled = true,
@@ -434,14 +414,14 @@ return {
         desc = "see what changed on that line based on the changes made",
         mode = "n",
       },
-      -- {
-      --   "<leader>D", ---dunno if i want this?
-      --   function()
-      --     require("gitsigns").reset_hunk()
-      --   end,
-      --   desc = "reset the hunk to what it use to be",
-      --   mode = "n",
-      -- },
+      {
+        "D",
+        function()
+          require("gitsigns").reset_hunk()
+        end,
+        desc = "reset the hunk to what it use to be",
+        mode = "n",
+      },
       {
         "<leader>b",
         function()
