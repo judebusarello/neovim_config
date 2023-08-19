@@ -10,32 +10,35 @@ vim.opt.cursorlineopt = "number"
 _G.Diffviewopen = false
 
 return {
-  { "catppuccin/nvim",               name = "catppuccin" },
-  { "HiPhish/nvim-ts-rainbow2",      enabled = true }, -- colorize parens and brackets
-  { "folke/trouble.nvim",            enabled = true },
-  { "folke/zen-mode.nvim",           enabled = true },
-  { "folke/flash.nvim",              enabled = false },
-  { "kdheepak/lazygit.nvim",         enabled = false },
-  { "goolord/alpha-nvim",            enabled = false }, -- Welcome screen
-  { "echasnovski/mini.pairs",        enabled = false }, -- This autotypes paired bracus
-  { "echasnovski/mini.pairs",        enabled = false }, -- This autotypes paired bracus
-  { "nvim-neo-tree/neo-tree.nvim",   enabled = false }, -- I prefer the telescope extension for this stuff
-  { "folke/neodev.nvim",             enabled = false },
-  { "nvim-lualine/lualine.nvim",     enabled = false }, -- don't like statuslines
-  { "echasnovski/mini.indentscope",  enabled = false }, -- the animated scope lines were distracting
-  { "L3MON4D3/LuaSnip",              enabled = true },  -- Dunno what I'm doing with this
-  { "SmiteshP/nvim-navic",           enabled = false }, -- This shows data in the statusbar that I don't have
-  { "folke/trouble.nvim",            enabled = false }, -- this is a list of all the diagnostic errors etc. Don't use it
-  { "RRethy/vim-illuminate",         enabled = false }, -- underlines all the same words as under the cursor. I find this distracting.
-  { "hrsh7th/cmp-buffer",            enabled = false }, -- I don't want autocomplete to come from random words in the buffer
-  { "hrsh7th/cmp-path",              enabled = false }, -- I don't use filesystem paths frequently. More likely to mess me up than help me out.
-  { "saadparwaiz1/cmp_luasnip",      enabled = true },  -- I don't use luasnip. No need to have it for autocomplete
-  { "ggandor/leap.nvim",             enabled = true },  -- I don't use easymotions
-  { "rmagatti/auto-session",         enabled = false }, -- I don't use easymotions
-  { "Bekaboo/deadcolumn.nvim",       enabled = true },  -- show colorcolumn as you approach
-  { "windwp/nvim-autopairs",         enabled = false }, -- This seems like I can make this work how I want
-  { "junegunn/fzf",                  build = "./install --bin" },
-  { "nvim-telescope/telescope.nvim", enabled = false },
+  { "catppuccin/nvim",                     name = "catppuccin" },
+  { "HiPhish/nvim-ts-rainbow2",            enabled = true },  -- colorize parens and brackets
+  { "Bekaboo/deadcolumn.nvim",             enabled = true },  -- show colorcolumn as you approach
+  { "lukas-reineke/indent-blankline.nvim", enabled = true },  -- show colorcolumn as you approach
+  { "L3MON4D3/LuaSnip",                    enabled = false }, -- Dunno what I'm doing with this
+  { "stevearc/dressing",                   enabled = false },
+  { "folke/trouble.nvim",                  enabled = false },
+  { "nvim-pack/nvim-spectre.nvim",         enabled = false },
+  { "folke/zen-mode.nvim",                 enabled = false },
+  { "folke/flash.nvim",                    enabled = false },
+  { "kdheepak/lazygit.nvim",               enabled = false },
+  { "goolord/alpha-nvim",                  enabled = false }, -- Welcome screen
+  { "echasnovski/mini.pairs",              enabled = false }, -- This autotypes paired bracus
+  { "echasnovski/mini.pairs",              enabled = false }, -- This autotypes paired bracus
+  { "nvim-neo-tree/neo-tree.nvim",         enabled = false }, -- I prefer the telescope extension for this stuff
+  { "folke/neodev.nvim",                   enabled = false },
+  { "nvim-lualine/lualine.nvim",           enabled = false }, -- don't like statuslines
+  { "echasnovski/mini.indentscope",        enabled = false }, -- the animated scope lines were distracting
+  { "SmiteshP/nvim-navic",                 enabled = false }, -- This shows data in the statusbar that I don't have
+  { "folke/trouble.nvim",                  enabled = false }, -- this is a list of all the diagnostic errors etc. Don't use it
+  { "RRethy/vim-illuminate",               enabled = false }, -- underlines all the same words as under the cursor. I find this distracting.
+  { "hrsh7th/cmp-buffer",                  enabled = false }, -- I don't want autocomplete to come from random words in the buffer
+  { "hrsh7th/cmp-path",                    enabled = false }, -- I don't use filesystem paths frequently. More likely to mess me up than help me out.
+  { "saadparwaiz1/cmp_luasnip",            enabled = false }, -- I don't use luasnip. No need to have it for autocomplete
+  { "ggandor/leap.nvim",                   enabled = false }, -- I don't use easymotions
+  { "rmagatti/auto-session",               enabled = false }, -- I don't use easymotions
+  { "windwp/nvim-autopairs",               enabled = false }, -- This seems like I can make this work how I want
+  { "junegunn/fzf",                        build = "./install --bin" },
+  { "nvim-telescope/telescope.nvim",       enabled = false },
   {
     "ibhagwan/fzf-lua",
     dependencies = { "nvim-tree/nvim-web-devicons" },
@@ -69,11 +72,7 @@ return {
       {
         "<leader>e",
         function()
-          local current_buf = vim.api.nvim_buf_get_name(0)
-          require("fzf-lua").files({
-            cwd = current_buf,
-            multiprocess = true,
-          })
+          require("fzf-lua").files({ cwd = vim.api.nvim_buf_get_name(0) })
         end,
         mode = "n",
       },
@@ -139,38 +138,6 @@ return {
             winhighlight = "NormalFloat:NormalFloat,FloatBorder:FloatBorder",
           },
         },
-      },
-    },
-  },
-  {
-    "norcalli/nvim-colorizer.lua",
-    enabled = true,
-    config = function()
-      local colorizer = require("colorizer")
-      colorizer.setup({
-        "css",
-        "javascript",
-        "javascriptreact",
-        "typescript",
-        "typescriptreact",
-      }, { css = true, css_fn = true, mode = "foreground" })
-    end,
-  },
-  {
-    "neovim/nvim-lspconfig",
-    enabled = true,
-    keys = {
-      {
-        "m",
-        vim.lsp.buf.definition,
-        desc = "jump to definition",
-        mode = "n",
-      },
-      {
-        "M",
-        vim.cmd.pop,
-        desc = "jump back from definition",
-        mode = "n",
       },
     },
   },
@@ -353,6 +320,31 @@ return {
       table.insert(opts.ensure_installed, "yapf")
       table.insert(opts.ensure_installed, "isort")
     end,
+  },
+  { "williamboman/mason-lspconfig.nvim", enabled = true },
+  {
+    "neovim/nvim-lspconfig",
+    enabled = true,
+    keys = {
+      {
+        "<leader>r",
+        vim.lsp.buf.rename,
+        desc = "rename variable under cursor",
+        mode = "n",
+      },
+      {
+        "m",
+        vim.lsp.buf.definition,
+        desc = "jump to definition",
+        mode = "n",
+      },
+      {
+        "M",
+        vim.cmd.pop,
+        desc = "jump back from definition",
+        mode = "n",
+      },
+    },
   },
   {
     "jose-elias-alvarez/null-ls.nvim",
