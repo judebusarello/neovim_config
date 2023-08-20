@@ -12,10 +12,10 @@ _G.Diffviewopen = false
 return {
   { "catppuccin/nvim",                     name = "catppuccin" },
   { "junegunn/fzf",                        build = "./install --bin" },
-  { "HiPhish/nvim-ts-rainbow2",            enabled = true }, -- colorize parens and brackets
-  { "Bekaboo/deadcolumn.nvim",             enabled = true }, -- show colorcolumn as you approach
-  { "lukas-reineke/indent-blankline.nvim", enabled = true }, -- show colorcolumn as you approach
-  { "echasnovski/mini.comment",            enabled = true }, --comment out visual selection
+  { "HiPhish/nvim-ts-rainbow2",            enabled = true },  -- colorize parens and brackets
+  { "Bekaboo/deadcolumn.nvim",             enabled = true },  -- show colorcolumn as you approach
+  { "lukas-reineke/indent-blankline.nvim", enabled = true },  -- show colorcolumn as you approach
+  { "echasnovski/mini.comment",            enabled = true },  --comment out visual selection
   { "nvim-lua/plenary.nvim",               enabled = false },
   { "L3MON4D3/LuaSnip",                    enabled = false }, -- Dunno what I'm doing with this
   { "folke/trouble.nvim",                  enabled = false },
@@ -37,8 +37,8 @@ return {
   { "RRethy/vim-illuminate",               enabled = false }, -- underlines all the same words as under the cursor. I find this distracting.
   { "hrsh7th/cmp-buffer",                  enabled = false }, -- I don't want autocomplete to come from random words in the buffer
   { "hrsh7th/cmp-path",                    enabled = false }, -- I don't use filesystem paths frequently. More likely to mess me up than help me out.
-  { "hrsh7th/cmp-vsnip",                   enabled = true }, -- I don't use filesystem paths frequently. More likely to mess me up than help me out.
-  { "hrsh7th/vim-vsnip",                   enabled = true }, -- I don't use filesystem paths frequently. More likely to mess me up than help me out.
+  { "hrsh7th/cmp-vsnip",                   enabled = true },  -- I don't use filesystem paths frequently. More likely to mess me up than help me out.
+  { "hrsh7th/vim-vsnip",                   enabled = true },  -- I don't use filesystem paths frequently. More likely to mess me up than help me out.
   { "saadparwaiz1/cmp_luasnip",            enabled = false }, -- I don't use luasnip. No need to have it for autocomplete
   { "ggandor/leap.nvim",                   enabled = false }, -- I don't use easymotions
   { "rmagatti/auto-session",               enabled = false }, -- I don't use easymotions
