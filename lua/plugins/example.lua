@@ -11,10 +11,11 @@ _G.Diffviewopen = false
 
 return {
   { "catppuccin/nvim",                     name = "catppuccin" },
-  { "HiPhish/nvim-ts-rainbow2",            enabled = true },  -- colorize parens and brackets
-  { "Bekaboo/deadcolumn.nvim",             enabled = true },  -- show colorcolumn as you approach
-  { "lukas-reineke/indent-blankline.nvim", enabled = true },  -- show colorcolumn as you approach
-  { "echasnovski/mini.comment",            enabled = true },  --comment out visual selection
+  { "junegunn/fzf",                        build = "./install --bin" },
+  { "HiPhish/nvim-ts-rainbow2",            enabled = true }, -- colorize parens and brackets
+  { "Bekaboo/deadcolumn.nvim",             enabled = true }, -- show colorcolumn as you approach
+  { "lukas-reineke/indent-blankline.nvim", enabled = true }, -- show colorcolumn as you approach
+  { "echasnovski/mini.comment",            enabled = true }, --comment out visual selection
   { "nvim-lua/plenary.nvim",               enabled = false },
   { "L3MON4D3/LuaSnip",                    enabled = false }, -- Dunno what I'm doing with this
   { "folke/trouble.nvim",                  enabled = false },
@@ -36,11 +37,12 @@ return {
   { "RRethy/vim-illuminate",               enabled = false }, -- underlines all the same words as under the cursor. I find this distracting.
   { "hrsh7th/cmp-buffer",                  enabled = false }, -- I don't want autocomplete to come from random words in the buffer
   { "hrsh7th/cmp-path",                    enabled = false }, -- I don't use filesystem paths frequently. More likely to mess me up than help me out.
+  { "hrsh7th/cmp-vsnip",                   enabled = true }, -- I don't use filesystem paths frequently. More likely to mess me up than help me out.
+  { "hrsh7th/vim-vsnip",                   enabled = true }, -- I don't use filesystem paths frequently. More likely to mess me up than help me out.
   { "saadparwaiz1/cmp_luasnip",            enabled = false }, -- I don't use luasnip. No need to have it for autocomplete
   { "ggandor/leap.nvim",                   enabled = false }, -- I don't use easymotions
   { "rmagatti/auto-session",               enabled = false }, -- I don't use easymotions
   { "windwp/nvim-autopairs",               enabled = false }, -- This seems like I can make this work how I want
-  { "junegunn/fzf",                        build = "./install --bin" },
   { "nvim-telescope/telescope.nvim",       enabled = false },
   { "jose-elias-alvarez/null-ls.nvim",     enabled = false },
   {
@@ -48,7 +50,7 @@ return {
     enabled = true,
     opts = {
       lsp_as_default_formatter = true,
-    }
+    },
   },
   {
     "ibhagwan/fzf-lua",
@@ -236,11 +238,25 @@ return {
     config = function()
       local cmp = require("cmp")
       local has_words_before = function()
-        if vim.api.nvim_buf_get_option(0, "buftype") == "prompt" then return false end
+        if vim.api.nvim_buf_get_option(0, "buftype") == "prompt" then
+          return false
+        end
         local line, col = unpack(vim.api.nvim_win_get_cursor(0))
-        return col ~= 0 and vim.api.nvim_buf_get_text(0, line - 1, 0, line - 1, col, {})[1]:match("^%s*$") == nil
+        return col ~= 0
+            and vim.api
+            .nvim_buf_get_text(0, line - 1, 0, line - 1, col, {})[1]
+            :match("^%s*$")
+            == nil
       end
       cmp.setup({
+        snippet = {
+          expand = function(args)
+            vim.fn["vsnip#anonymous"](args.body)
+          end,
+        },
+        window = {
+          documentation = cmp.config.window.bordered(),
+        },
         sorting = {
           priority_weight = 2,
           comparators = {
@@ -277,10 +293,9 @@ return {
           end),
         }),
         sources = cmp.config.sources({
-          { name = "copilot",  group_index = 2 },
-          { name = "nvim_lsp", group_index = 2 },
+          { name = "nvim_lsp" },
+          { name = "copilot" },
         }, {
-          { name = "buffer" },
           { name = "spell" },
         }),
       })
@@ -414,14 +429,14 @@ return {
         desc = "see what changed on that line based on the changes made",
         mode = "n",
       },
-      {
-        "D",
-        function()
-          require("gitsigns").reset_hunk()
-        end,
-        desc = "reset the hunk to what it use to be",
-        mode = "n",
-      },
+      -- {
+      --   "D",
+      --   function()
+      --     require("gitsigns").reset_hunk()
+      --   end,
+      --   desc = "reset the hunk to what it use to be",
+      --   mode = "n",
+      -- },
       {
         "<leader>b",
         function()
@@ -436,13 +451,13 @@ return {
         base = "HEAD~1",
         preview_config = {
           -- Options passed to nvim_open_win
-          border = 'single',
-          style = 'minimal',
-          relative = 'cursor',
+          border = "single",
+          style = "minimal",
+          relative = "cursor",
           row = 1,
-          col = 1
-        }
+          col = 1,
+        },
       })
     end,
-  }
+  },
 }
