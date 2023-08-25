@@ -48,8 +48,14 @@ return {
   {
     "nvimdev/guard.nvim",
     enabled = true,
+    config = function()
+      local ft = require('guard.filetype')
+      ft('python'):fmt({ cmd = '/home/jude/vistar/ci/fmt-python', args = { 'fix' }, fname = false, stdin = false })
+      require('guard').setup({})
+    end,
     opts = {
-      lsp_as_default_formatter = true,
+      fmt_on_save = true,
+      lsp_as_default_formatter = false,
     },
   },
   {
@@ -343,7 +349,6 @@ return {
       table.insert(opts.ensure_installed, "lua-language-server")
       table.insert(opts.ensure_installed, "python-lsp-server")
       table.insert(opts.ensure_installed, "typescript-language-server")
-      table.insert(opts.ensure_installed, "yapf")
       table.insert(opts.ensure_installed, "isort")
     end,
   },
@@ -369,6 +374,23 @@ return {
         vim.cmd.pop,
         desc = "jump back from definition",
         mode = "n",
+      },
+    },
+    opts = {
+      servers = {
+        pylsp = {
+          settings = {
+            pylsp = {
+              plugins = {
+                pyflakes = { enabled = false },
+                pycodestyle = { enabled = false },
+                mccabe = { enabled = false },
+                autopep8 = { enabled = false },
+                yapf = { enabled = false },
+              },
+            },
+          },
+        },
       },
     },
   },
