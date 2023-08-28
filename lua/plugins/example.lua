@@ -9,6 +9,10 @@ vim.opt.cursorlineopt = "number"
 
 _G.Diffviewopen = false
 
+-- https://github.com/rhysd/committia.vim promising?
+-- tyru/columnskip.vim  promising?
+--https://github.com/kevinhwang91/nvim-bqf
+--https://github.com/andersevenrud/nvim_context_vt
 return {
   { "catppuccin/nvim",                     name = "catppuccin" },
   { "junegunn/fzf",                        build = "./install --bin" },
@@ -16,7 +20,6 @@ return {
   { "Bekaboo/deadcolumn.nvim",             enabled = true },  -- show colorcolumn as you approach
   { "lukas-reineke/indent-blankline.nvim", enabled = true },  -- show colorcolumn as you approach
   { "echasnovski/mini.comment",            enabled = true },  --comment out visual selection
-  { "nvim-lua/plenary.nvim",               enabled = false },
   { "L3MON4D3/LuaSnip",                    enabled = false }, -- Dunno what I'm doing with this
   { "folke/trouble.nvim",                  enabled = false },
   { "folke/todo-comments.nvim",            enabled = false },
@@ -43,15 +46,66 @@ return {
   { "ggandor/leap.nvim",                   enabled = false }, -- I don't use easymotions
   { "rmagatti/auto-session",               enabled = false }, -- I don't use easymotions
   { "windwp/nvim-autopairs",               enabled = false }, -- This seems like I can make this work how I want
-  { "nvim-telescope/telescope.nvim",       enabled = false },
-  { "jose-elias-alvarez/null-ls.nvim",     enabled = false },
+  { "nvim-lua/plenary.nvim",               enabled = true },
+  { "nvim-telescope/telescope.nvim",       enabled = true },
+  {
+    "mrjones2014/op.nvim",
+    build = 'make install',
+    opts = {},
+    cmd = { "OpSidebar", "OpSignin", "OpNote" }
+  },
+  -- {
+  --   "mrjones2014/op.nvim",
+  --   enabled = true,
+  --   build = "make install",
+  --   cmd = {
+  --     "OpAnalyzeBuffer",
+  --     "OpCreate",
+  --     "OpEdit",
+  --     "OpInsert",
+  --     "OpNote",
+  --     "OpOpen",
+  --     "OpSidebar",
+  --     "OpSignin",
+  --     "OpSignout",
+  --     "OpView",
+  --     "OpWhoami",
+  --   },
+  --   opts = {
+  --     signin_on_start = true,
+  --   },
+  -- },
+  -- {
+  --   "pwntester/octo.nvim",
+  --   enabled = true,
+  --   lazy = false,
+  --   config = function()
+  --     require("octo").setup({
+  --       picker = "fzf-lua",
+  --       gh_env = function()
+  --         local github_token =
+  --             require("op.api").item.get({ "GitHub", "--fields", "token" })[1]
+  --         if not github_token or not vim.startswith(github_token, "ghp_") then
+  --           error("Failed to get GitHub token.")
+  --         end
+  --         return { GITHUB_TOKEN = github_token }
+  --       end,
+  --     })
+  --   end,
+  -- },
+  { "jose-elias-alvarez/null-ls.nvim",   enabled = false },
   {
     "nvimdev/guard.nvim",
     enabled = true,
     config = function()
-      local ft = require('guard.filetype')
-      ft('python'):fmt({ cmd = '/home/jude/vistar/ci/fmt-python', args = { 'fix' }, fname = false, stdin = false })
-      require('guard').setup({})
+      local ft = require("guard.filetype")
+      ft("python"):fmt({
+        cmd = "/home/jude/vistar/ci/fmt-python",
+        args = { "fix" },
+        fname = false,
+        stdin = false,
+      })
+      require("guard").setup({})
     end,
     opts = {
       fmt_on_save = true,
@@ -394,7 +448,7 @@ return {
       },
     },
   },
-  { "stevearc/dressing.nvim",            enabled = true }, --this makes the rename dialog appear right over the thing you're renaming instead of the command line
+  { "stevearc/dressing.nvim", enabled = true }, --this makes the rename dialog appear right over the thing you're renaming instead of the command line
   {
     "LazyVim/LazyVim",
     enabled = true,
