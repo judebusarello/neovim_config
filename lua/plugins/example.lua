@@ -262,17 +262,25 @@ return {
       {
         "<S-esc>",
         function()
-          require("toggleterm").toggle(2, 0, vim.loop.cwd(), "float")
+          local terms = require("toggleterm.terminal")
+          local terminals = terms.get_all()
+          for _, term in pairs(terminals) do
+            term:close()
+          end
         end,
-        desc = "close terminal",
+        desc = "close all terminals",
         mode = "n",
       },
       {
         "<S-esc>",
         function()
-          require("toggleterm").toggle(2, 0, vim.loop.cwd(), "float")
+          local terms = require("toggleterm.terminal")
+          local terminals = terms.get_all()
+          for _, term in pairs(terminals) do
+            term:close()
+          end
         end,
-        desc = "close terminal",
+        desc = "close all terminals",
         mode = "t",
       },
       {
@@ -379,17 +387,17 @@ return {
     enabled = true,
     keys = {
       {
-        "<leader>r",
+        "<leader>R",
         vim.lsp.buf.rename,
         desc = "rename variable under cursor",
         mode = "n",
       },
-      {
-        "<leader>R",
-        vim.lsp.buf.references,
-        desc = "rename variable under cursor",
-        mode = "n",
-      },
+      -- {
+      --   "<leader>r",
+      --   vim.lsp.buf.references,
+      --   desc = "get references",
+      --   mode = "n",
+      -- },
       {
         "m",
         vim.lsp.buf.definition,
