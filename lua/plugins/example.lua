@@ -7,12 +7,9 @@ vim.opt.swapfile = false
 vim.opt.cursorline = true
 vim.opt.cursorlineopt = "number"
 
-_G.Diffviewopen = false
-
 -- https://github.com/rhysd/committia.vim promising?
 -- tyru/columnskip.vim  promising?
 --https://github.com/kevinhwang91/nvim-bqf
---https://github.com/andersevenrud/nvim_context_vt
 return {
   { "catppuccin/nvim",                             name = "catppuccin" },
   { "junegunn/fzf",                                build = "./install --bin" },
@@ -250,10 +247,10 @@ return {
         mode = "n",
       },
       {
-        "<leader>mm",
+        "<leader>m",
         function()
           local Terminal = require("toggleterm.terminal").Terminal
-          local spotify = Terminal:new({ cmd = "spt", hidden = true })
+          local spotify = Terminal:new({ id = 999999999, cmd = "spotify_player" })
           spotify:toggle()
         end,
         desc = "open spotify cli",
@@ -286,18 +283,8 @@ return {
       {
         "<leader>g",
         function()
-          vim.cmd([[
-          if has('nvim') && executable('nvr')
-            let $GIT_EDITOR = "nvr -cc split --remote-wait +'set bufhidden=wipe'"
-          endif
-          ]])
           local Terminal = require("toggleterm.terminal").Terminal
-          local lazygit = Terminal:new({
-            cmd = "lazygit",
-            hidden = true,
-            direction = "float",
-            start_in_insert = true,
-          })
+          local lazygit = Terminal:new({ id = 999999998, cmd = "lazygit" })
           lazygit:toggle()
         end,
         desc = "open lazygit",
