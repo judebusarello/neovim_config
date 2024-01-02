@@ -11,7 +11,11 @@ vim.opt.cursorlineopt = "number"
 -- tyru/columnskip.vim  promising?
 --https://github.com/kevinhwang91/nvim-bqf
 return {
-  { "catppuccin/nvim",                             name = "catppuccin" },
+  {
+    "catppuccin/nvim",
+    name = "catppuccin",
+    priority = 1000,
+  },
   { "junegunn/fzf",                                build = "./install --bin" },
   { "HiPhish/nvim-ts-rainbow2",                    enabled = false }, -- colorize parens and brackets
   { "Bekaboo/deadcolumn.nvim",                     enabled = true },  -- show colorcolumn as you approach
@@ -54,7 +58,7 @@ return {
   { "ggandor/leap.nvim",                           enabled = false }, -- I don't use easymotions
   { "rmagatti/auto-session",                       enabled = false }, -- I don't use easymotions
   { "windwp/nvim-autopairs",                       enabled = false }, -- This seems like I can make this work how I want
-  { "nvim-lua/plenary.nvim",                       enabled = false },
+  { "nvim-lua/plenary.nvim",                       enabled = true },
   { "nvim-telescope/telescope.nvim",               enabled = false },
   -- {
   --   "mrjones2014/op.nvim",
@@ -114,6 +118,71 @@ return {
   --     lsp_as_default_formatter = false,
   --   },
   -- },
+  --
+  {
+    "simonmclean/triptych.nvim",
+    event = "VeryLazy",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+    },
+    config = function()
+      require("triptych").setup({
+        mappings = {
+          -- Everything below is buffer-local, meaning it will only apply to Triptych windows
+          show_help = "g?",
+          jump_to_cwd = ".", -- Pressing again will toggle back
+          nav_left = "h",
+          nav_right = { "l", "<CR>" },
+          delete = "d",
+          add = "a",
+          copy = "c",
+          rename = "r",
+          cut = "x",
+          paste = "p",
+          quit = "q",
+          toggle_hidden = "<leader>.",
+        },
+        extension_mappings = {},
+        options = {
+          dirs_first = true,
+          show_hidden = false,
+          line_numbers = {
+            enabled = true,
+            relative = false,
+          },
+          file_icons = {
+            enabled = true,
+            directory_icon = "",
+            fallback_file_icon = "",
+          },
+          column_widths = { 0.25, 0.25, 0.5 }, -- Must add up to 1 after rounding to 2 decimal places
+          highlights = {                       -- Highlight groups to use. See `:highlight` or `:h highlight`
+            file_names = "NONE",
+            directory_names = "NONE",
+          },
+          syntax_highlighting = {
+            enabled = true,
+            debounce_ms = 100,
+          },
+        },
+        git_signs = {
+          enabled = false,
+        },
+        diagnostic_signs = {
+          enabled = false,
+        },
+      })
+    end,
+    keys = {
+      {
+        "<leader>t",
+        function()
+          require("triptych").open_triptych()
+        end,
+        mode = "n",
+      },
+    }
+  },
   {
     "ibhagwan/fzf-lua",
     dependencies = { "nvim-tree/nvim-web-devicons" },
@@ -169,6 +238,16 @@ return {
         "<leader>o",
         function()
           require("fzf-lua").oldfiles({ multiprocess = true })
+        end,
+        mode = "n",
+      },
+      {
+        "<leader>O",
+        function()
+          require("fzf-lua").files({
+            prompt = "LS> ",
+            cmd = "find . -maxdepth 1",
+          })
         end,
         mode = "n",
       },
@@ -250,7 +329,8 @@ return {
         "<leader>m",
         function()
           local Terminal = require("toggleterm.terminal").Terminal
-          local spotify = Terminal:new({ id = 999999999, cmd = "spotify_player" })
+          local spotify =
+              Terminal:new({ id = 999999999, cmd = "spotify_player" })
           spotify:toggle()
         end,
         desc = "open spotify cli",
