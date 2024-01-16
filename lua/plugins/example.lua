@@ -31,7 +31,6 @@ return {
   { "zbirenbaum/copilot.lua",                      enabled = false },
   { "MunifTanjim/nui.nvim",                        enabled = false },
   { "folke/noice.nvim",                            enabled = false },
-  { "rcarriga/nvim-notify",                        enabled = false },
   { "echasnovski/mini.ai",                         enabled = false }, --don't know how to use
   { "nvimdev/dashboard-nvim",                      enabled = false }, --don't know how to use
   { "nvim-treesitter/nvim-treesitter-context",     enabled = false }, --don't know how to use
@@ -518,6 +517,24 @@ return {
     },
   },
   {
+    "rcarriga/nvim-notify",
+    enabled = true,
+    opts = {
+      level = vim.log.levels.INFO,
+      timeout = 100,
+      stages = "fade",
+      minimum_width = 0,
+      fps = 60,
+      top_down = true,
+      render = function(bufnr, notif)
+        local padded_message = vim.tbl_map(function(line)
+          return "  " .. line .. "  "
+        end, notif.message)
+        vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, padded_message)
+      end,
+    }
+  },
+  {
     "akinsho/toggleterm.nvim",
     enabled = true,
     opts = {
@@ -817,22 +834,22 @@ return {
     "lewis6991/gitsigns.nvim",
     enabled = true,
     keys = {
-      {
-        "b",
-        function()
-          require("gitsigns").next_hunk()
-        end,
-        desc = "see what changed on that line based on the changes made",
-        mode = "n",
-      },
-      {
-        "B",
-        function()
-          require("gitsigns").prev_hunk()
-        end,
-        desc = "see what changed on that line based on the changes made",
-        mode = "n",
-      },
+      -- {
+      --   "",
+      --   function()
+      --     require("gitsigns").next_hunk()
+      --   end,
+      --   desc = "see what changed on that line based on the changes made",
+      --   mode = "n",
+      -- },
+      -- {
+      --   "",
+      --   function()
+      --     require("gitsigns").prev_hunk()
+      --   end,
+      --   desc = "see what changed on that line based on the changes made",
+      --   mode = "n",
+      -- },
       {
         "<leader>d",
         function()
