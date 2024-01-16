@@ -10,12 +10,15 @@ vim.opt.cursorlineopt = "number"
 -- https://github.com/rhysd/committia.vim promising?
 -- tyru/columnskip.vim  promising?
 --https://github.com/kevinhwang91/nvim-bqf
+--:set foldmethod=expr
+--foldexpr=nvim_treesitter#foldexpr()
 return {
   {
     "catppuccin/nvim",
     name = "catppuccin",
     priority = 1000,
   },
+  { "tpope/vim-fugitive",                          enabled = true },  -- colorize parens and brackets
   { "junegunn/fzf",                                build = "./install --bin" },
   { "HiPhish/nvim-ts-rainbow2",                    enabled = false }, -- colorize parens and brackets
   { "Bekaboo/deadcolumn.nvim",                     enabled = true },  -- show colorcolumn as you approach
@@ -28,7 +31,6 @@ return {
   { "zbirenbaum/copilot.lua",                      enabled = false },
   { "MunifTanjim/nui.nvim",                        enabled = false },
   { "folke/noice.nvim",                            enabled = false },
-  { "LazyVim/LazyVim",                             enabled = false },
   { "rcarriga/nvim-notify",                        enabled = false },
   { "echasnovski/mini.ai",                         enabled = false }, --don't know how to use
   { "nvimdev/dashboard-nvim",                      enabled = false }, --don't know how to use
@@ -60,44 +62,244 @@ return {
   { "windwp/nvim-autopairs",                       enabled = false }, -- This seems like I can make this work how I want
   { "nvim-lua/plenary.nvim",                       enabled = true },
   { "nvim-telescope/telescope.nvim",               enabled = false },
-  -- {
-  --   "mrjones2014/op.nvim",
-  --   enabled = true,
-  --   build = "make install",
-  --   opts = {
-  --     signin_on_start = true,
-  --     biometric_unlock = false,
-  --   },
-  --   cmd = {
-  --     "OpAnalyzeBuffer",
-  --     "OpCreate",
-  --     "OpEdit",
-  --     "OpInsert",
-  --     "OpNote",
-  --     "OpOpen",
-  --     "OpSidebar",
-  --     "OpSignin",
-  --     "OpSignout",
-  --     "OpView",
-  --     "OpWhoami",
-  --   },
-  -- },
-  -- {
-  --   "pwntester/octo.nvim",
-  --   enabled = true,
-  --   lazy = false,
-  --   opts = {
-  --     picker = "fzf-lua",
-  --     gh_env = function()
-  --       local github_token =
-  --           require("op.api").item.get({ "GitHub", "--fields", "token" })[1]
-  --       if not github_token or not vim.startswith(github_token, "ghp_") then
-  --         error("Failed to get GitHub token.")
-  --       end
-  --       return { GITHUB_TOKEN = github_token }
-  --     end,
-  --   }
-  -- },
+  {
+    "pwntester/octo.nvim",
+    enabled = true,
+    lazy = false,
+    config = function()
+      require("octo").setup({
+        picker = "fzf-lua",
+        enable_builtin = true,
+        use_local_fs = true,
+        comment_icon = "💬",
+        snippet_context_lines = 10,
+        mappings = {
+          review_diff = {
+            next_thread = { lhs = "t", desc = "move to next thread" },
+            prev_thread = { lhs = "T", desc = "move to previous thread" },
+            add_review_comment = {
+              lhs = "c",
+              desc = "add a new review comment",
+            },
+            select_next_entry = {
+              lhs = "n",
+              desc = "move to previous changed file",
+            },
+            select_prev_entry = {
+              lhs = "N",
+              desc = "move to next changed file",
+            },
+            close_review_tab = { lhs = "<leader>x", desc = "close review tab" },
+          },
+          review_thread = {
+            add_comment = { lhs = "c", desc = "add comment" },
+            delete_comment = { lhs = "d", desc = "delete comment" },
+            next_comment = { lhs = "t", desc = "go to next comment" },
+            prev_comment = { lhs = "T", desc = "go to previous comment" },
+            select_next_entry = {
+              lhs = "n",
+              desc = "move to previous changed file",
+            },
+            select_prev_entry = {
+              lhs = "N",
+              desc = "move to next changed file",
+            },
+            close_review_tab = { lhs = "<leader>x", desc = "close review tab" },
+          },
+          submit_win = {
+            approve_review = { lhs = "P", desc = "approve review" },
+            comment_review = { lhs = "p", desc = "comment review" },
+            request_changes = { lhs = "pp", desc = "request changes review" },
+            close_review_tab = { lhs = "<leader>x", desc = "close review tab" },
+          },
+          pull_request = {
+            squash_and_merge_pr = {
+              lhs = "<space>psm",
+              desc = "squash and merge PR",
+            },
+            list_changed_files = {
+              lhs = "<space>pf",
+              desc = "list PR changed files",
+            },
+            show_pr_diff = { lhs = "<space>pd", desc = "show PR diff" },
+            add_reviewer = { lhs = "r", desc = "add reviewer" },
+            add_comment = { lhs = "c", desc = "add comment" },
+            delete_comment = { lhs = "d", desc = "delete comment" },
+          },
+        },
+        picker_config = {
+          use_emojis = true, -- only used by "fzf-lua" picker for now
+          mappings = {       -- mappings for the pickers
+            open_in_browser = { lhs = "<C-b>", desc = "open issue in browser" },
+            copy_url = { lhs = "<C-y>", desc = "copy url to system clipboard" },
+            checkout_pr = { lhs = "<C-o>", desc = "checkout pull request" },
+            merge_pr = { lhs = "<C-r>", desc = "merge pull request" },
+          },
+        },
+        file_panel = {
+          size = 5,         -- changed files panel rows
+          use_icons = true, -- use web-devicons in file panel (if false, nvim-web-devicons does not need to be installed)
+        },
+      })
+      vim.keymap.set("i", "@", "@<C-x><C-o>", { silent = true, buffer = true })
+      vim.keymap.set("i", "#", "#<C-x><C-o>", { silent = true, buffer = true })
+    end,
+    keys = {
+      {
+        "<leader>r",
+        function()
+          -- require("octo.pickers.fzf-lua.provider").picker.search({
+          --   prompt =
+          --   "is:pr repo:Vistar-Media/vistar -reviewed-by:@me review-requested:@me is:open"
+          -- })
+          local fzf_actions =
+              require("octo.pickers.fzf-lua.pickers.fzf_actions")
+          local entry_maker = require("octo.pickers.fzf-lua.entry_maker")
+          local fzf = require("fzf-lua")
+          local gh = require("octo.gh")
+          local graphql = require("octo.gh.graphql")
+          local octo_config = require("octo.config")
+          local picker_utils = require("octo.pickers.fzf-lua.pickers.utils")
+          local previewers = require("octo.pickers.fzf-lua.previewers")
+          local utils = require("octo.utils")
+
+          local function checkout_pull_request(entry)
+            utils.checkout_pr(entry.obj.number)
+          end
+
+          local opts = {}
+          if not opts.states then
+            opts.states = "OPEN"
+          end
+          local filter = picker_utils.get_filter(opts, "pull_request")
+          if utils.is_blank(opts.repo) then
+            opts.repo = utils.get_remote_name()
+          end
+          if not opts.repo then
+            utils.error("Cannot find repo")
+            return
+          end
+
+          local owner, name = utils.split_repo(opts.repo)
+          local cfg = octo_config.values
+          local order_by = cfg.pull_requests.order_by
+
+          local query = graphql(
+            "pull_requests_query",
+            owner,
+            name,
+            filter,
+            order_by.field,
+            order_by.direction,
+            { escape = false }
+          )
+
+          local formatted_pulls = {}
+
+          local get_contents = function(fzf_cb)
+            gh.run({
+              args = {
+                "api",
+                "graphql",
+                "--paginate",
+                "--jq",
+                ".",
+                "-f",
+                string.format("query=%s", query),
+              },
+              stream_cb = function(data, err)
+                if err and not utils.is_blank(err) then
+                  utils.error(err)
+                  fzf_cb()
+                elseif data then
+                  local resp = utils.aggregate_pages(
+                    data,
+                    "data.repository.pullRequests.nodes"
+                  )
+                  local pull_requests = resp.data.repository.pullRequests.nodes
+
+                  for _, pull in ipairs(pull_requests) do
+                    local entry = entry_maker.gen_from_issue(pull)
+
+                    if entry ~= nil then
+                      formatted_pulls[entry.ordinal] = entry
+                      local highlight
+                      if entry.obj.isDraft then
+                        highlight = "OctoSymbol"
+                      else
+                        highlight = "OctoStateOpen"
+                      end
+                      local prefix =
+                          fzf.utils.ansi_from_hl(highlight, entry.value)
+                      fzf_cb(prefix .. " " .. entry.obj.title)
+                    end
+                  end
+                end
+              end,
+              cb = function()
+                fzf_cb()
+              end,
+            })
+          end
+
+          fzf.fzf_exec(get_contents, {
+            prompt = picker_utils.get_prompt(opts.prompt_title),
+            previewer = previewers.issue(formatted_pulls),
+            fzf_opts = {
+              ["--no-multi"] = "", -- TODO this can support multi, maybe.
+              ["--info"] = "default",
+            },
+            actions = vim.tbl_extend(
+              "force",
+              fzf_actions.common_open_actions(formatted_pulls),
+              {
+                [utils.convert_vim_mapping_to_fzf(
+                  cfg.picker_config.mappings.checkout_pr.lhs
+                )] = function(selected)
+                  local entry = formatted_pulls[selected[1]]
+                  checkout_pull_request(entry)
+                end,
+              }
+            ),
+          })
+        end,
+        mode = "n",
+      },
+      {
+        "<leader>R",
+        function()
+          require("octo.pickers.fzf-lua.provider").picker.prs()
+        end,
+        mode = "n",
+      },
+    },
+  },
+
+  {
+    "aaronhallaert/advanced-git-search.nvim",
+    config = function()
+      require("advanced_git_search.fzf").setup({
+        {
+          -- fugitive or diffview
+          diff_plugin = "fugitive",
+          -- customize git in previewer
+          -- e.g. flags such as { "--no-pager" }, or { "-c", "delta.side-by-side=false" }
+          git_flags = {},
+          -- customize git diff in previewer
+          -- e.g. flags such as { "--raw" }
+          git_diff_flags = {},
+          -- Show builtin git pickers when executing "show_custom_functions" or :AdvancedGitSearch
+          show_builtin_git_pickers = false,
+          entry_default_author_or_date = "author", -- one of "author" or "date"
+        },
+      })
+    end,
+    dependencies = {
+      "tpope/vim-fugitive",
+      "tpope/vim-rhubarb",
+    },
+  },
+
   -- { "jose-elias-alvarez/null-ls.nvim",     enabled = false },
   -- { "elentok/format-on-save.nvim" },
   -- {
@@ -128,9 +330,7 @@ return {
     config = function()
       require("triptych").setup({
         mappings = {
-          -- Everything below is buffer-local, meaning it will only apply to Triptych windows
           show_help = "g?",
-          jump_to_cwd = ".", -- Pressing again will toggle back
           nav_left = "h",
           nav_right = { "l", "<CR>" },
           delete = "d",
@@ -140,7 +340,7 @@ return {
           cut = "x",
           paste = "p",
           quit = "q",
-          toggle_hidden = "<leader>.",
+          toggle_hidden = ".",
         },
         extension_mappings = {},
         options = {
@@ -181,7 +381,7 @@ return {
         end,
         mode = "n",
       },
-    }
+    },
   },
   {
     "ibhagwan/fzf-lua",
@@ -230,7 +430,7 @@ return {
       {
         "<leader>f",
         function()
-          require("fzf-lua").lsp_finder({ multiprocess = true })
+          require("fzf-lua").lsp_references({ multiprocess = true })
         end,
         mode = "n",
       },
@@ -238,16 +438,6 @@ return {
         "<leader>o",
         function()
           require("fzf-lua").oldfiles({ multiprocess = true })
-        end,
-        mode = "n",
-      },
-      {
-        "<leader>O",
-        function()
-          require("fzf-lua").files({
-            prompt = "LS> ",
-            cmd = "find . -maxdepth 1",
-          })
         end,
         mode = "n",
       },
@@ -260,9 +450,10 @@ return {
       },
     },
   },
+  -- vim.treesitter.language.register('markdown', 'octo')
   {
     "nvim-treesitter",
-    enabled = false,
+    enabled = true,
     -- opts = {
     --   rainbow = {
     --     enable = true,
@@ -295,6 +486,37 @@ return {
   --     },
   --   },
   -- },
+  {
+    "chrisgrieser/nvim-chainsaw",
+    enabled = true,
+    opts = {
+      marker = "[TESTING]",
+      logStatements = {
+        messageLog = {
+          javascript = 'console.log("%s");',
+          go = 'import "fmt"; fmt.print("%s")',
+        },
+      },
+    },
+    keys = {
+      {
+        "<leader>p",
+        function()
+          require("chainsaw").messageLog()
+        end,
+        desc = "open scratch terminal",
+        mode = "n",
+      },
+      {
+        "<leader>P",
+        function()
+          require("chainsaw").variableLog()
+        end,
+        desc = "open scratch terminal",
+        mode = "n",
+      },
+    },
+  },
   {
     "akinsho/toggleterm.nvim",
     enabled = true,
@@ -366,6 +588,27 @@ return {
           local Terminal = require("toggleterm.terminal").Terminal
           local lazygit = Terminal:new({ id = 999999998, cmd = "lazygit" })
           lazygit:toggle()
+        end,
+        desc = "open lazygit",
+        mode = "n",
+      },
+      {
+        "<leader>h",
+        function()
+          local Terminal = require("toggleterm.terminal").Terminal
+          local lazygit = Terminal:new({ id = 999999997, cmd = "lazydocker" })
+          lazygit:toggle()
+        end,
+        desc = "open lazygit",
+        mode = "n",
+      },
+      {
+        "<leader>G",
+        function()
+          local Terminal = require("toggleterm.terminal").Terminal
+          local githubdashboard =
+              Terminal:new({ id = 999999996, cmd = "gh dash" })
+          githubdashboard:toggle()
         end,
         desc = "open lazygit",
         mode = "n",
@@ -480,6 +723,43 @@ return {
     },
     opts = {
       servers = {
+        gopls = {
+          on_new_config = function(config, new_root_dir)
+            local gopackagesdriver = new_root_dir .. "/.gopackagesdriver.sh"
+            if utils.fs_stat(gopackagesdriver) ~= nil then
+              config.cmd_env = {
+                GOPACKAGESDRIVER = gopackagesdriver,
+                GOPACKAGESDRIVER_BAZEL_BUILD_FLAGS = "--strategy=GoStdlibList=local",
+              }
+            end
+          end,
+          settings = {
+            gopls = {
+              directoryFilters = {
+                "-bazel-bin",
+                "-bazel-out",
+                "-bazel-testlogs",
+                "-bazel-vistar",
+                "-bazel-app",
+              },
+              hints = {
+                assignVariableTypes = true,
+                compositeLiteralFields = true,
+                constantValues = true,
+                functionTypeParameters = true,
+                parameterNames = true,
+                rangeVariableTypes = true,
+              },
+              -- staticcheck = true,
+              -- ui = {
+              --   semanticTokens = true,
+              -- },
+            },
+          },
+          flags = {
+            debounce_text_changes = 150,
+          },
+        },
         pylsp = {
           settings = {
             pylsp = {
@@ -538,9 +818,17 @@ return {
     enabled = true,
     keys = {
       {
-        "<leader>D",
+        "b",
         function()
-          require("gitsigns").diffthis()
+          require("gitsigns").next_hunk()
+        end,
+        desc = "see what changed on that line based on the changes made",
+        mode = "n",
+      },
+      {
+        "B",
+        function()
+          require("gitsigns").prev_hunk()
         end,
         desc = "see what changed on that line based on the changes made",
         mode = "n",
@@ -564,7 +852,10 @@ return {
       {
         "<leader>bb",
         function()
-          require("gitsigns").blame_line({ full = true })
+          require("gitsigns").blame_line({
+            full = true,
+            ignore_whitespace = true,
+          })
         end,
         desc = "show to commit message of the current line",
         mode = "n",
@@ -572,6 +863,7 @@ return {
     },
     config = function()
       require("gitsigns").setup({
+        -- base = "@{u}...HEAD",
         base = "HEAD~1",
         preview_config = {
           -- Options passed to nvim_open_win
