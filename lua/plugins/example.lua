@@ -81,17 +81,18 @@ return {
               desc = "add a new review comment",
             },
             select_next_entry = {
-              lhs = "n",
+              lhs = ">",
               desc = "move to previous changed file",
             },
             select_prev_entry = {
-              lhs = "N",
+              lhs = "<",
               desc = "move to next changed file",
             },
             close_review_tab = { lhs = "<leader>x", desc = "close review tab" },
           },
           review_thread = {
             add_comment = { lhs = "c", desc = "add comment" },
+            add_suggestion = { lhs = "C", desc = "add suggestions" },
             delete_comment = { lhs = "d", desc = "delete comment" },
             next_comment = { lhs = "t", desc = "go to next comment" },
             prev_comment = { lhs = "T", desc = "go to previous comment" },
@@ -103,13 +104,13 @@ return {
               lhs = "N",
               desc = "move to next changed file",
             },
-            close_review_tab = { lhs = "<leader>x", desc = "close review tab" },
+            close_review_tab = { lhs = "x", desc = "close review tab" },
           },
           submit_win = {
             approve_review = { lhs = "P", desc = "approve review" },
             comment_review = { lhs = "p", desc = "comment review" },
             request_changes = { lhs = "pp", desc = "request changes review" },
-            close_review_tab = { lhs = "<leader>x", desc = "close review tab" },
+            close_review_tab = { lhs = "x", desc = "close review tab" },
           },
           pull_request = {
             squash_and_merge_pr = {
@@ -493,7 +494,7 @@ return {
       logStatements = {
         messageLog = {
           javascript = 'console.log("%s");',
-          go = 'import "fmt"; fmt.print("%s")',
+          go = 'fmt.Print("%s")',
         },
       },
     },
@@ -518,7 +519,7 @@ return {
   },
   {
     "rcarriga/nvim-notify",
-    enabled = true,
+    enabled = false,
     opts = {
       level = vim.log.levels.INFO,
       timeout = 100,
@@ -600,7 +601,7 @@ return {
         mode = "t",
       },
       {
-        "<leader>g",
+        "<leader>G",
         function()
           local Terminal = require("toggleterm.terminal").Terminal
           local lazygit = Terminal:new({ id = 999999998, cmd = "lazygit" })
@@ -620,7 +621,7 @@ return {
         mode = "n",
       },
       {
-        "<leader>G",
+        "<leader>g",
         function()
           local Terminal = require("toggleterm.terminal").Terminal
           local githubdashboard =
