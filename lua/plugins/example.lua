@@ -24,6 +24,8 @@ return {
   { "Bekaboo/deadcolumn.nvim",                     enabled = true },  -- show colorcolumn as you approach
   { "lukas-reineke/indent-blankline.nvim",         enabled = true },  -- show colorcolumn as you approach
   { "echasnovski/mini.comment",                    enabled = true },  --comment out visual selection
+  { "hrsh7th/vim-vsnip",                           enabled = true },  -- Needed for completion
+  { "hrsh7th/cmp-vsnip",                           enabled = true },  -- Needed for completion
   { "L3MON4D3/LuaSnip",                            enabled = false }, -- Dunno what I'm doing with this
   { "folke/trouble.nvim",                          enabled = false },
   { "folke/todo-comments.nvim",                    enabled = false },
@@ -54,8 +56,6 @@ return {
   { "RRethy/vim-illuminate",                       enabled = false }, -- underlines all the same words as under the cursor. I find this distracting.
   { "hrsh7th/cmp-buffer",                          enabled = false }, -- I don't want autocomplete to come from random words in the buffer
   { "hrsh7th/cmp-path",                            enabled = false }, -- I don't use filesystem paths frequently. More likely to mess me up than help me out.
-  { "hrsh7th/vim-vsnip",                           enabled = false }, -- I don't use filesystem paths frequently. More likely to mess me up than help me out.
-  { "saadparwaiz1/cmp_luasnip",                    enabled = false }, -- I don't use luasnip. No need to have it for autocomplete
   { "ggandor/leap.nvim",                           enabled = false }, -- I don't use easymotions
   { "rmagatti/auto-session",                       enabled = false }, -- I don't use easymotions
   { "windwp/nvim-autopairs",                       enabled = false }, -- This seems like I can make this work how I want
@@ -144,135 +144,6 @@ return {
       vim.keymap.set("i", "@", "@<C-x><C-o>", { silent = true, buffer = true })
       vim.keymap.set("i", "#", "#<C-x><C-o>", { silent = true, buffer = true })
     end,
-    keys = {
-      {
-        "<leader>r",
-        function()
-          -- require("octo.pickers.fzf-lua.provider").picker.search({
-          --   prompt =
-          --   "is:pr repo:Vistar-Media/vistar -reviewed-by:@me review-requested:@me is:open"
-          -- })
-          local fzf_actions =
-              require("octo.pickers.fzf-lua.pickers.fzf_actions")
-          local entry_maker = require("octo.pickers.fzf-lua.entry_maker")
-          local fzf = require("fzf-lua")
-          local gh = require("octo.gh")
-          local graphql = require("octo.gh.graphql")
-          local octo_config = require("octo.config")
-          local picker_utils = require("octo.pickers.fzf-lua.pickers.utils")
-          local previewers = require("octo.pickers.fzf-lua.previewers")
-          local utils = require("octo.utils")
-
-          local function checkout_pull_request(entry)
-            utils.checkout_pr(entry.obj.number)
-          end
-
-          local opts = {}
-          if not opts.states then
-            opts.states = "OPEN"
-          end
-          local filter = picker_utils.get_filter(opts, "pull_request")
-          if utils.is_blank(opts.repo) then
-            opts.repo = utils.get_remote_name()
-          end
-          if not opts.repo then
-            utils.error("Cannot find repo")
-            return
-          end
-
-          local owner, name = utils.split_repo(opts.repo)
-          local cfg = octo_config.values
-          local order_by = cfg.pull_requests.order_by
-
-          local query = graphql(
-            "pull_requests_query",
-            owner,
-            name,
-            filter,
-            order_by.field,
-            order_by.direction,
-            { escape = false }
-          )
-
-          local formatted_pulls = {}
-
-          local get_contents = function(fzf_cb)
-            gh.run({
-              args = {
-                "api",
-                "graphql",
-                "--paginate",
-                "--jq",
-                ".",
-                "-f",
-                string.format("query=%s", query),
-              },
-              stream_cb = function(data, err)
-                if err and not utils.is_blank(err) then
-                  utils.error(err)
-                  fzf_cb()
-                elseif data then
-                  local resp = utils.aggregate_pages(
-                    data,
-                    "data.repository.pullRequests.nodes"
-                  )
-                  local pull_requests = resp.data.repository.pullRequests.nodes
-
-                  for _, pull in ipairs(pull_requests) do
-                    local entry = entry_maker.gen_from_issue(pull)
-
-                    if entry ~= nil then
-                      formatted_pulls[entry.ordinal] = entry
-                      local highlight
-                      if entry.obj.isDraft then
-                        highlight = "OctoSymbol"
-                      else
-                        highlight = "OctoStateOpen"
-                      end
-                      local prefix =
-                          fzf.utils.ansi_from_hl(highlight, entry.value)
-                      fzf_cb(prefix .. " " .. entry.obj.title)
-                    end
-                  end
-                end
-              end,
-              cb = function()
-                fzf_cb()
-              end,
-            })
-          end
-
-          fzf.fzf_exec(get_contents, {
-            prompt = picker_utils.get_prompt(opts.prompt_title),
-            previewer = previewers.issue(formatted_pulls),
-            fzf_opts = {
-              ["--no-multi"] = "", -- TODO this can support multi, maybe.
-              ["--info"] = "default",
-            },
-            actions = vim.tbl_extend(
-              "force",
-              fzf_actions.common_open_actions(formatted_pulls),
-              {
-                [utils.convert_vim_mapping_to_fzf(
-                  cfg.picker_config.mappings.checkout_pr.lhs
-                )] = function(selected)
-                  local entry = formatted_pulls[selected[1]]
-                  checkout_pull_request(entry)
-                end,
-              }
-            ),
-          })
-        end,
-        mode = "n",
-      },
-      {
-        "<leader>R",
-        function()
-          require("octo.pickers.fzf-lua.provider").picker.prs()
-        end,
-        mode = "n",
-      },
-    },
   },
 
   {
@@ -377,7 +248,7 @@ return {
       {
         "<leader>t",
         function()
-          require("triptych").open_triptych()
+          require("triptych").toggle_triptych()
         end,
         mode = "n",
       },
@@ -391,8 +262,8 @@ return {
         "max-perf",
         winopts = {
           -- border = "FloatBorder",
-          width = 0.8,
-          height = 0.7,
+          width = 0.9,
+          height = 0.9,
           preview = {
             -- hidden = "hidden",
             border = "noborder",
@@ -430,7 +301,14 @@ return {
       {
         "<leader>f",
         function()
-          require("fzf-lua").lsp_references({ multiprocess = true })
+          require("fzf-lua").lsp_finder({ multiprocess = true })
+        end,
+        mode = "n",
+      },
+      {
+        "<leader>F",
+        function()
+          require("fzf-lua").lsp_code_actions({ multiprocess = true })
         end,
         mode = "n",
       },
@@ -448,6 +326,39 @@ return {
         end,
         mode = "n",
       },
+    },
+    lsp = {
+      async_or_timeout = 5000, -- timeout(ms) or 'true' for async calls
+      git_icons = true,
+      code_actions = {
+        prompt = "Code Actions> ",
+        async_or_timeout = 5000000,
+        -- when git-delta is installed use "codeaction_native" for beautiful diffs
+        -- try it out with `:FzfLua lsp_code_actions previewer=codeaction_native`
+        -- scroll up to `previewers.codeaction{_native}` for more previewer options
+        previewer = "codeaction",
+      },
+      finder = {
+        --        prompt      = "LSP Finder> ",
+        --        file_icons  = true,
+        --        color_icons = true,
+        --        git_icons   = false,
+        async = true, -- async by default
+        --        silent      = true,         -- suppress "not found"
+        --        separator   = "| ",         -- separator after provider prefix, `false` to disable
+        --        includeDeclaration = true,  -- include current declaration in LSP context
+        --        -- by default display all LSP locations
+        --        -- to customize, duplicate table and delete unwanted providers
+        --        providers   = {
+        --            { "references",      prefix = require("fzf-lua").utils.ansi_codes.blue("ref ") },
+        --            { "definitions",     prefix = require("fzf-lua").utils.ansi_codes.green("def ") },
+        --            { "declarations",    prefix = require("fzf-lua").utils.ansi_codes.magenta("decl") },
+        --            { "typedefs",        prefix = require("fzf-lua").utils.ansi_codes.red("tdef") },
+        --            { "implementations", prefix = require("fzf-lua").utils.ansi_codes.green("impl") },
+        --            { "incoming_calls",  prefix = require("fzf-lua").utils.ansi_codes.cyan("in  ") },
+        --            { "outgoing_calls",  prefix = require("fzf-lua").utils.ansi_codes.yellow("out ") },
+        --        },
+      }
     },
   },
   -- vim.treesitter.language.register('markdown', 'octo')
@@ -533,7 +444,7 @@ return {
         end, notif.message)
         vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, padded_message)
       end,
-    }
+    },
   },
   {
     "akinsho/toggleterm.nvim",
@@ -544,8 +455,8 @@ return {
       start_in_insert = true,
       float_opts = {
         border = "curved",
-        width = 270,
-        height = 55,
+        width = 300,
+        height = 100,
       },
     },
     keys = {
@@ -611,7 +522,7 @@ return {
         mode = "n",
       },
       {
-        "<leader>h",
+        "<leader>D",
         function()
           local Terminal = require("toggleterm.terminal").Terminal
           local lazygit = Terminal:new({ id = 999999997, cmd = "lazydocker" })
@@ -650,6 +561,16 @@ return {
             == nil
       end
       cmp.setup({
+        snippet = {
+          -- REQUIRED - you must specify a snippet engine
+          expand = function(args)
+            vim.fn["vsnip#anonymous"](args.body)   -- For `vsnip` users.
+            -- require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
+            -- require('snippy').expand_snippet(args.body) -- For `snippy` users.
+            -- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
+            -- vim.snippet.expand(args.body) -- For native neovim snippets (Neovim v0.10+)
+          end,
+        },
         window = {
           documentation = cmp.config.window.bordered(),
         },
@@ -687,9 +608,18 @@ return {
               fallback()
             end
           end),
+          -- Set configuration for specific filetype.
+          -- cmp.setup.filetype('gitcommit', {
+          --sources = cmp.config.sources({
+          --{ name = 'cmp_git' }, -- You can specify the `cmp_git` source if you were installed it.
+          --}, {
+          -- { name = 'buffer' },
+          --}),
+          --})
         }),
         sources = cmp.config.sources({
           { name = "nvim_lsp" },
+          { name = "vsnip" },
         }, {
           { name = "spell" },
         }),
@@ -715,7 +645,7 @@ return {
     enabled = true,
     keys = {
       {
-        "<leader>R",
+        "<leader>r",
         vim.lsp.buf.rename,
         desc = "rename variable under cursor",
         mode = "n",
@@ -743,8 +673,9 @@ return {
       servers = {
         gopls = {
           on_new_config = function(config, new_root_dir)
-            local gopackagesdriver = new_root_dir .. "/.gopackagesdriver.sh"
-            if utils.fs_stat(gopackagesdriver) ~= nil then
+            local gopackagesdriver =
+            "/Users/jude/vistar/tools/gopackagesdriver.sh"
+            if vim.loop.fs_stat(new_root_dir) ~= nil then
               config.cmd_env = {
                 GOPACKAGESDRIVER = gopackagesdriver,
                 GOPACKAGESDRIVER_BAZEL_BUILD_FLAGS = "--strategy=GoStdlibList=local",
@@ -752,31 +683,27 @@ return {
             end
           end,
           settings = {
+            -- hints = {
+            --   assignVariableTypes = true,
+            --   compositeLiteralFields = true,
+            --   constantValues = true,
+            --   functionTypeParameters = true,
+            --   parameterNames = true,
+            --   rangeVariableTypes = true,
+            -- },
             gopls = {
               directoryFilters = {
                 "-bazel-bin",
                 "-bazel-out",
                 "-bazel-testlogs",
-                "-bazel-vistar",
-                "-bazel-app",
+                -- "-bazel-" .. require("utils").get_current_dir_name(),
               },
-              hints = {
-                assignVariableTypes = true,
-                compositeLiteralFields = true,
-                constantValues = true,
-                functionTypeParameters = true,
-                parameterNames = true,
-                rangeVariableTypes = true,
-              },
-              -- staticcheck = true,
-              -- ui = {
-              --   semanticTokens = true,
-              -- },
             },
           },
-          flags = {
-            debounce_text_changes = 150,
-          },
+          -- root_dir = require("utils").root_pattern("WORKSPACE"),
+          -- flags = {
+          --   debounce_text_changes = 150,
+          -- },
         },
         pylsp = {
           settings = {
@@ -799,7 +726,7 @@ return {
     "LazyVim/LazyVim",
     enabled = true,
     opts = {
-      colorscheme = "catppuccin-mocha",
+      colorscheme = "catppuccin-macchiato",
     },
   },
   {
