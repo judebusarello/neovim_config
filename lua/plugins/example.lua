@@ -62,6 +62,18 @@ return {
   { "nvim-lua/plenary.nvim",                       enabled = true },
   { "nvim-telescope/telescope.nvim",               enabled = false },
   {
+    "LazyVim/LazyVim",
+    enabled = true,
+    opts = {
+      colorscheme = "catppuccin-macchiato",
+    },
+  },
+  {
+    "bakks/butterfish.nvim",
+    enabled = true,
+    dependencies = { 'tpope/vim-commentary' }
+  },
+  {
     "pwntester/octo.nvim",
     enabled = true,
     lazy = false,
@@ -477,6 +489,14 @@ return {
         mode = "n",
       },
       {
+        "<leader>l",
+        function()
+          require("toggleterm").toggle(3, 0, vim.loop.cwd(), "float")
+        end,
+        desc = "open scratch terminal",
+        mode = "n",
+      },
+      {
         "<leader>m",
         function()
           local Terminal = require("toggleterm.terminal").Terminal
@@ -564,7 +584,7 @@ return {
         snippet = {
           -- REQUIRED - you must specify a snippet engine
           expand = function(args)
-            vim.fn["vsnip#anonymous"](args.body)   -- For `vsnip` users.
+            vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
             -- require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
             -- require('snippy').expand_snippet(args.body) -- For `snippy` users.
             -- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
@@ -722,13 +742,6 @@ return {
     },
   },
   { "stevearc/dressing.nvim",            enabled = true }, --this makes the rename dialog appear right over the thing you're renaming instead of the command line
-  {
-    "LazyVim/LazyVim",
-    enabled = true,
-    opts = {
-      colorscheme = "catppuccin-macchiato",
-    },
-  },
   {
     "akinsho/bufferline.nvim",
     enabled = true,
