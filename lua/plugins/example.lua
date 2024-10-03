@@ -12,17 +12,20 @@ vim.opt.cursorlineopt = "number"
 --https://github.com/kevinhwang91/nvim-bqf
 --:set foldmethod=expr
 --foldexpr=nvim_treesitter#foldexpr()
+--
 return {
   {
     "catppuccin/nvim",
     name = "catppuccin",
     priority = 1000,
   },
-  { "tpope/vim-fugitive",                          enabled = true },  -- colorize parens and brackets
+  { "tpope/vim-fugitive",                          enabled = true }, -- colorize parens and brackets
   { "junegunn/fzf",                                build = "./install --bin" },
+  { "neovim/nvim-lspconfig",                       enabled = true },
+  { "hrsh7th/cmp-nvim-lsp",                        enabled = true },
   { "HiPhish/nvim-ts-rainbow2",                    enabled = false }, -- colorize parens and brackets
   { "Bekaboo/deadcolumn.nvim",                     enabled = true },  -- show colorcolumn as you approach
-  { "lukas-reineke/indent-blankline.nvim",         enabled = true },  -- show colorcolumn as you approach
+  { "lukas-reineke/indent-blankline.nvim",         enabled = false }, -- gives the context on the cursor's current scope
   { "echasnovski/mini.comment",                    enabled = true },  --comment out visual selection
   { "hrsh7th/vim-vsnip",                           enabled = true },  -- Needed for completion
   { "hrsh7th/cmp-vsnip",                           enabled = true },  -- Needed for completion
@@ -62,6 +65,16 @@ return {
   { "nvim-lua/plenary.nvim",                       enabled = true },
   { "nvim-telescope/telescope.nvim",               enabled = false },
   {
+    "antosha417/nvim-lsp-file-operations",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "nvim-tree/nvim-tree.lua",
+    },
+    config = function()
+      require("lsp-file-operations").setup()
+    end,
+  },
+  {
     "LazyVim/LazyVim",
     enabled = true,
     opts = {
@@ -71,7 +84,32 @@ return {
   {
     "bakks/butterfish.nvim",
     enabled = true,
-    dependencies = { 'tpope/vim-commentary' }
+    dependencies = { "tpope/vim-commentary" },
+    keys = {
+      -- { "<leader>ap", ":BFFilePrompt ",   desc = "Butterfish File Prompt" },
+      -- { "<leader>ar", ":BFRewrite ",      mode = { "n", "v" },            desc = "Butterfish Rewrite" },
+      {
+        "E",
+        ":BFComment<CR>",
+        mode = { "n", "v" },
+        desc = "Butterfish Comment",
+      },
+      -- { "<leader>ae", ":BFExplain<CR>",   mode = { "n" },                 desc = "Butterfish Explain" },
+      -- { "<leader>ae", ":BFExplain<CR>",   mode = { "v" },                 desc = "Butterfish Explain" },
+      -- { "<leader>af", ":BFFix<CR>",       desc = "Butterfish Fix" },
+      -- { "<leader>ai", ":BFImplement<CR>", desc = "Butterfish Implement" },
+      -- { "<leader>ad", ":BFEdit ",         desc = "Butterfish Edit" },
+      -- { "<leader>aq", ":BFQuestion ", desc = "Butterfish Question" },
+    },
+    config = function()
+      local butterfish = require("butterfish")
+      -- butterfish.lm_base_path = "http://localhost:1234/v1"
+      -- butterfish.lm_fast_model = "ZeroWw/microsoft_WizardLM-2-7B-GGUF"
+      -- butterfish.lm_smart_model = "ZeroWw/microsoft_WizardLM-2-7B-GGUF"
+      butterfish.active_color_group = "User1"
+      butterfish.active_color_cterm = "8"
+      butterfish.active_color_gui = "#808080"
+    end,
   },
   {
     "pwntester/octo.nvim",
@@ -228,7 +266,7 @@ return {
         extension_mappings = {},
         options = {
           dirs_first = true,
-          show_hidden = false,
+          show_hidden = true,
           line_numbers = {
             enabled = true,
             relative = false,
@@ -249,7 +287,7 @@ return {
           },
         },
         git_signs = {
-          enabled = false,
+          enabled = true,
         },
         diagnostic_signs = {
           enabled = false,
@@ -282,8 +320,9 @@ return {
             wrap = "wrap",
             scrollbar = true,
             layout = "horizontal",
-            title = false,
-            horizontal = "left:40%",
+            title = true,
+            number = false,
+            horizontal = "right:60%",
           },
         },
       })
@@ -370,7 +409,7 @@ return {
         --            { "incoming_calls",  prefix = require("fzf-lua").utils.ansi_codes.cyan("in  ") },
         --            { "outgoing_calls",  prefix = require("fzf-lua").utils.ansi_codes.yellow("out ") },
         --        },
-      }
+      },
     },
   },
   -- vim.treesitter.language.register('markdown', 'octo')
@@ -461,16 +500,19 @@ return {
   {
     "akinsho/toggleterm.nvim",
     enabled = true,
-    opts = {
-      direction = "float",
-      auto_scroll = false,
-      start_in_insert = true,
-      float_opts = {
-        border = "curved",
-        width = 300,
-        height = 100,
-      },
-    },
+    config = function()
+      vim.keymap.del('t', '<esc><esc>')
+      require("toggleterm").setup({
+        direction = "float",
+        auto_scroll = false,
+        start_in_insert = true,
+        float_opts = {
+          border = "curved",
+          width = 300,
+          height = 100,
+        },
+      })
+    end,
     keys = {
       {
         "<leader>j",
@@ -582,64 +624,41 @@ return {
       end
       cmp.setup({
         snippet = {
-          -- REQUIRED - you must specify a snippet engine
           expand = function(args)
-            vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
-            -- require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
-            -- require('snippy').expand_snippet(args.body) -- For `snippy` users.
-            -- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
-            -- vim.snippet.expand(args.body) -- For native neovim snippets (Neovim v0.10+)
+            require('luasnip').lsp_expand(args.body)
           end,
         },
         window = {
           documentation = cmp.config.window.bordered(),
         },
-        sorting = {
-          priority_weight = 2,
-          --   comparators = {
-          --     require("copilot_cmp.comparators").prioritize,
-          --
-          --     -- Below is the default comparitor list and order for nvim-cmp
-          --     cmp.config.compare.offset,
-          --     -- cmp.config.compare.scopes, --this is commented in nvim-cmp too
-          --     cmp.config.compare.exact,
-          --     cmp.config.compare.score,
-          --     cmp.config.compare.recently_used,
-          --     cmp.config.compare.locality,
-          --     cmp.config.compare.kind,
-          --     cmp.config.compare.sort_text,
-          --     cmp.config.compare.length,
-          --     cmp.config.compare.order,
-          --   },
-        },
         mapping = cmp.mapping.preset.insert({
           [";"] = cmp.mapping.confirm({ select = true }),
           ["<Tab>"] = vim.schedule_wrap(function(fallback)
             if cmp.visible() and has_words_before() then
-              cmp.select_next_item({ behavior = cmp.SelectBehavior.Select })
+              cmp.select_next_item({ behavior = cmp.SelectBehavior })
             else
               fallback()
             end
           end),
-          ["S-<Tab>"] = vim.schedule_wrap(function(fallback)
+          ["<S-Tab>"] = vim.schedule_wrap(function(fallback)
             if cmp.visible() and has_words_before() then
-              cmp.select_prev_item({ behavior = cmp.SelectBehavior.Select })
+              cmp.select_prev_item({ behavior = cmp.SelectBehavior })
             else
               fallback()
             end
           end),
           -- Set configuration for specific filetype.
-          -- cmp.setup.filetype('gitcommit', {
-          --sources = cmp.config.sources({
-          --{ name = 'cmp_git' }, -- You can specify the `cmp_git` source if you were installed it.
-          --}, {
-          -- { name = 'buffer' },
-          --}),
-          --})
+          cmp.setup.filetype("gitcommit", {
+            sources = cmp.config.sources({
+              { name = "cmp_git" }, -- You can specify the `cmp_git` source if you were installed it.
+            }, {
+              { name = "buffer" },
+            }),
+          }),
         }),
         sources = cmp.config.sources({
           { name = "nvim_lsp" },
-          { name = "vsnip" },
+          -- { name = "vsnip" },
         }, {
           { name = "spell" },
         }),
@@ -695,6 +714,7 @@ return {
           on_new_config = function(config, new_root_dir)
             local gopackagesdriver =
             "/Users/jude/vistar/tools/gopackagesdriver.sh"
+            -- ".config/nvim/lua/plugins/gopackagesdriver.sh"
             if vim.loop.fs_stat(new_root_dir) ~= nil then
               config.cmd_env = {
                 GOPACKAGESDRIVER = gopackagesdriver,
@@ -729,6 +749,7 @@ return {
           settings = {
             pylsp = {
               plugins = {
+                rope_autoimport = { enabled = true },
                 pyflakes = { enabled = false },
                 pycodestyle = { enabled = false },
                 mccabe = { enabled = false },
@@ -756,18 +777,15 @@ return {
     keys = {
       {
         "x",
-        function()
-          require("mini.bufremove").delete(0, false)
-        end,
-        desc = "delete current buffer",
-        mode = "n",
+        ":bp|bd #<CR>",
+        mode = { "n", "v" },
+        desc = "Delete Buffer",
       },
       {
-        "X",
-        function()
-          vim.cmd([[b#]])
-        end,
-        desc = "undo delete current buffer",
+        "<leader>h",
+        "gt",
+        mode = { "n", "v" },
+        desc = "switch tab",
       },
     },
   },
