@@ -6,6 +6,7 @@ vim.opt.colorcolumn = "80"
 vim.opt.swapfile = false
 vim.opt.cursorline = true
 vim.opt.cursorlineopt = "number"
+vim.opt.smartindent = false
 
 -- https://github.com/rhysd/committia.vim promising?
 -- tyru/columnskip.vim  promising?
@@ -19,51 +20,48 @@ return {
     name = "catppuccin",
     priority = 1000,
   },
-  { "tpope/vim-fugitive",                          enabled = true }, -- colorize parens and brackets
-  { "junegunn/fzf",                                build = "./install --bin" },
-  { "neovim/nvim-lspconfig",                       enabled = true },
-  { "hrsh7th/cmp-nvim-lsp",                        enabled = true },
-  { "HiPhish/nvim-ts-rainbow2",                    enabled = false }, -- colorize parens and brackets
-  { "Bekaboo/deadcolumn.nvim",                     enabled = true },  -- show colorcolumn as you approach
-  { "lukas-reineke/indent-blankline.nvim",         enabled = false }, -- gives the context on the cursor's current scope
-  { "echasnovski/mini.comment",                    enabled = true },  --comment out visual selection
-  { "hrsh7th/vim-vsnip",                           enabled = true },  -- Needed for completion
-  { "hrsh7th/cmp-vsnip",                           enabled = true },  -- Needed for completion
-  { "L3MON4D3/LuaSnip",                            enabled = false }, -- Dunno what I'm doing with this
-  { "folke/trouble.nvim",                          enabled = false },
-  { "folke/todo-comments.nvim",                    enabled = false },
-  { "zbirenbaum/copilot-cmp",                      enabled = false },
-  { "zbirenbaum/copilot.lua",                      enabled = false },
-  { "MunifTanjim/nui.nvim",                        enabled = false },
-  { "folke/noice.nvim",                            enabled = false },
-  { "echasnovski/mini.ai",                         enabled = false }, --don't know how to use
-  { "nvimdev/dashboard-nvim",                      enabled = false }, --don't know how to use
-  { "nvim-treesitter/nvim-treesitter-context",     enabled = false }, --don't know how to use
-  { "nvim-pack/nvim-spectre.nvim",                 enabled = false },
-  { "nvim-treesitter/nvim-treesitter-textobjects", enabled = false }, --don't know how to use
-  { "folke/zen-mode.nvim",                         enabled = false },
-  { "windwp/nvim-ts-autotag",                      enabled = false },
-  { "folke/flash.nvim",                            enabled = false },
-  { "kdheepak/lazygit.nvim",                       enabled = false },
-  { "goolord/alpha-nvim",                          enabled = false }, -- Welcome screen
-  { "echasnovski/mini.pairs",                      enabled = false }, -- This autotypes paired bracus
-  { "echasnovski/mini.pairs",                      enabled = false }, -- This autotypes paired bracus
-  { "nvim-neo-tree/neo-tree.nvim",                 enabled = false }, -- I prefer the telescope extension for this stuff
-  { "folke/neodev.nvim",                           enabled = false },
-  { "mfussenegger/nvim-lint",                      enabled = false },
-  { "stevearc/conform.nvim",                       enabled = false },
-  { "nvim-lualine/lualine.nvim",                   enabled = false }, -- don't like statuslines
-  { "echasnovski/mini.indentscope",                enabled = false }, -- the animated scope lines were distracting
-  { "SmiteshP/nvim-navic",                         enabled = false }, -- This shows data in the statusbar that I don't have
-  { "folke/trouble.nvim",                          enabled = false }, -- this is a list of all the diagnostic errors etc. Don't use it
-  { "RRethy/vim-illuminate",                       enabled = false }, -- underlines all the same words as under the cursor. I find this distracting.
-  { "hrsh7th/cmp-buffer",                          enabled = false }, -- I don't want autocomplete to come from random words in the buffer
-  { "hrsh7th/cmp-path",                            enabled = false }, -- I don't use filesystem paths frequently. More likely to mess me up than help me out.
-  { "ggandor/leap.nvim",                           enabled = false }, -- I don't use easymotions
-  { "rmagatti/auto-session",                       enabled = false }, -- I don't use easymotions
-  { "windwp/nvim-autopairs",                       enabled = false }, -- This seems like I can make this work how I want
-  { "nvim-lua/plenary.nvim",                       enabled = true },
-  { "nvim-telescope/telescope.nvim",               enabled = false },
+  { "tpope/vim-fugitive",                      enabled = true },            -- Git integration for Vim
+  { "junegunn/fzf",                            build = "./install --bin" }, -- Fuzzy finder for files, buffers, etc.
+  { "neovim/nvim-lspconfig",                   enabled = true },            -- Quickstart configurations for the Nvim LSP client
+  { "hrsh7th/cmp-nvim-lsp",                    enabled = true },            -- Completion source for nvim-cmp based on LSP
+  { "Bekaboo/deadcolumn.nvim",                 enabled = true },            -- Show colorcolumn as you approach
+  { "echasnovski/mini.comment",                enabled = true },            -- Comment out visual selection
+  { "hrsh7th/vim-vsnip",                       enabled = true },            -- Snippet plugin for Vim
+  { "hrsh7th/cmp-vsnip",                       enabled = true },            -- Vsnip completion source for nvim-cmp
+  { "nvim-lua/plenary.nvim",                   enabled = true },            -- Lua utility functions for Neovim
+  { "L3MON4D3/LuaSnip",                        enabled = false },           -- Snippet engine for Neovim written in Lua
+  { "HiPhish/nvim-ts-rainbow2",                enabled = false },           -- Colorize parens and brackets
+  { "lukas-reineke/indent-blankline.nvim",     enabled = false },           -- Adds indentation guides to all lines
+  { "folke/trouble.nvim",                      enabled = false },           -- A pretty list for showing diagnostics, references, etc.
+  { "folke/todo-comments.nvim",                enabled = false },           -- Highlight and list TODO comments
+  { "zbirenbaum/copilot-cmp",                  enabled = false },           -- Copilot integration with nvim-cmp
+  { "zbirenbaum/copilot.lua",                  enabled = false },           -- Copilot integration for Neovim
+  { "MunifTanjim/nui.nvim",                    enabled = false },           -- UI component library for Neovim
+  { "folke/noice.nvim",                        enabled = false },           -- Enhance the default Neovim UI
+  { "echasnovski/mini.ai",                     enabled = false },           -- Text objects for common programming patterns
+  { "nvimdev/dashboard-nvim",                  enabled = false },           -- A fancy start screen for Neovim
+  { "nvim-treesitter/nvim-treesitter-context", enabled = false },           -- Show code context using treesitter
+  { "nvim-pack/nvim-spectre.nvim",             enabled = false },           -- Find and replace tool for Neovim
+  { "folke/zen-mode.nvim",                     enabled = false },           -- Distraction-free coding for Neovim
+  { "windwp/nvim-ts-autotag",                  enabled = false },           -- Auto close and rename HTML tags
+  { "folke/flash.nvim",                        enabled = false },           -- Flash plugin for Neovim
+  { "kdheepak/lazygit.nvim",                   enabled = false },           -- Lazygit integration for Neovim
+  { "goolord/alpha-nvim",                      enabled = false },           -- A fast and customizable start screen for Neovim
+  { "echasnovski/mini.pairs",                  enabled = false },           -- Autocompletion for paired characters like brackets
+  { "nvim-neo-tree/neo-tree.nvim",             enabled = false },           -- File explorer tree for Neovim
+  { "folke/neodev.nvim",                       enabled = false },           -- Development setup for Neovim plugins
+  { "mfussenegger/nvim-lint",                  enabled = false },           -- Asynchronous linter for Neovim
+  { "stevearc/conform.nvim",                   enabled = false },           -- Code formatter for Neovim
+  { "nvim-lualine/lualine.nvim",               enabled = false },           -- Statusline plugin for Neovim
+  { "echasnovski/mini.indentscope",            enabled = false },           -- Animated scope lines for indentation
+  { "SmiteshP/nvim-navic",                     enabled = false },           -- Code navigation component for the statusline
+  { "RRethy/vim-illuminate",                   enabled = false },           -- Highlight other uses of the word under the cursor
+  { "hrsh7th/cmp-buffer",                      enabled = false },           -- Buffer words completion source for nvim-cmp
+  { "hrsh7th/cmp-path",                        enabled = false },           -- Filesystem paths completion source for nvim-cmp
+  { "ggandor/leap.nvim",                       enabled = false },           -- Motion plugin for Neovim
+  { "rmagatti/auto-session",                   enabled = false },           -- Session management for Neovim
+  { "windwp/nvim-autopairs",                   enabled = false },           -- Autocompletion for paired characters
+  { "nvim-telescope/telescope.nvim",           enabled = false },           -- FZF-like searcher
   {
     "antosha417/nvim-lsp-file-operations",
     dependencies = {
@@ -86,12 +84,22 @@ return {
     enabled = true,
     dependencies = { "tpope/vim-commentary" },
     keys = {
-      -- { "<leader>ap", ":BFFilePrompt ",   desc = "Butterfish File Prompt" },
-      -- { "<leader>ar", ":BFRewrite ",      mode = { "n", "v" },            desc = "Butterfish Rewrite" },
+      {
+        "Q",
+        ":BFQuestion ",
+        mode = { "v" },
+        desc = "Butterfish Question",
+      },
+      {
+        "R",
+        ":BFRewrite ",
+        mode = { "v" },
+        desc = "Butterfish Rewrite",
+      },
       {
         "E",
         ":BFComment<CR>",
-        mode = { "n", "v" },
+        mode = { "v" },
         desc = "Butterfish Comment",
       },
       -- { "<leader>ae", ":BFExplain<CR>",   mode = { "n" },                 desc = "Butterfish Explain" },
@@ -249,50 +257,7 @@ return {
       "nvim-lua/plenary.nvim",
     },
     config = function()
-      require("triptych").setup({
-        mappings = {
-          show_help = "g?",
-          nav_left = "h",
-          nav_right = { "l", "<CR>" },
-          delete = "d",
-          add = "a",
-          copy = "c",
-          rename = "r",
-          cut = "x",
-          paste = "p",
-          quit = "q",
-          toggle_hidden = ".",
-        },
-        extension_mappings = {},
-        options = {
-          dirs_first = true,
-          show_hidden = true,
-          line_numbers = {
-            enabled = true,
-            relative = false,
-          },
-          file_icons = {
-            enabled = true,
-            directory_icon = "",
-            fallback_file_icon = "",
-          },
-          column_widths = { 0.25, 0.25, 0.5 }, -- Must add up to 1 after rounding to 2 decimal places
-          highlights = {                       -- Highlight groups to use. See `:highlight` or `:h highlight`
-            file_names = "NONE",
-            directory_names = "NONE",
-          },
-          syntax_highlighting = {
-            enabled = true,
-            debounce_ms = 100,
-          },
-        },
-        git_signs = {
-          enabled = true,
-        },
-        diagnostic_signs = {
-          enabled = false,
-        },
-      })
+      require("triptych").setup({})
     end,
     keys = {
       {
@@ -389,74 +354,44 @@ return {
         -- scroll up to `previewers.codeaction{_native}` for more previewer options
         previewer = "codeaction",
       },
-      finder = {
-        --        prompt      = "LSP Finder> ",
-        --        file_icons  = true,
-        --        color_icons = true,
-        --        git_icons   = false,
-        async = true, -- async by default
-        --        silent      = true,         -- suppress "not found"
-        --        separator   = "| ",         -- separator after provider prefix, `false` to disable
-        --        includeDeclaration = true,  -- include current declaration in LSP context
-        --        -- by default display all LSP locations
-        --        -- to customize, duplicate table and delete unwanted providers
-        --        providers   = {
-        --            { "references",      prefix = require("fzf-lua").utils.ansi_codes.blue("ref ") },
-        --            { "definitions",     prefix = require("fzf-lua").utils.ansi_codes.green("def ") },
-        --            { "declarations",    prefix = require("fzf-lua").utils.ansi_codes.magenta("decl") },
-        --            { "typedefs",        prefix = require("fzf-lua").utils.ansi_codes.red("tdef") },
-        --            { "implementations", prefix = require("fzf-lua").utils.ansi_codes.green("impl") },
-        --            { "incoming_calls",  prefix = require("fzf-lua").utils.ansi_codes.cyan("in  ") },
-        --            { "outgoing_calls",  prefix = require("fzf-lua").utils.ansi_codes.yellow("out ") },
-        --        },
-      },
     },
   },
-  -- vim.treesitter.language.register('markdown', 'octo')
+  { "nvim-treesitter/nvim-treesitter-textobjects", enabled = true }, -- Additional textobjects for treesitter
   {
     "nvim-treesitter",
     enabled = true,
-    -- opts = {
-    --   rainbow = {
-    --     enable = true,
-    --   },
-    -- },
+    opts = {
+      incremental_selection = {
+        enable = true,
+        keymaps = {
+          init_selection = "<TAB>",
+          node_incremental = "<TAB>",
+          node_decremental = "<S-TAB>",
+        },
+      },
+      indent = true,
+      rainbow = {
+        enable = true,
+      },
+    },
   },
-  -- {
-  --   "folke/noice.nvim",
-  --   enabled = true,
-  --   opts = {
-  --     messages = {
-  --       enabled = true,            -- enables the Noice messages UI
-  --       view = "mini",             -- default view for messages
-  --       view_error = "mini",       -- view for errors
-  --       view_warn = "mini",        -- view for warnings
-  --       view_history = "messages", -- view for :messages
-  --       view_search = false,       -- view for search count messages. Set to `false` to disable
-  --     },
-  --     views = {
-  --       cmdline_popup = {
-  --         border = {
-  --           style = "none",
-  --           padding = { 1, 2 },
-  --         },
-  --         filter_options = {},
-  --         win_options = {
-  --           winhighlight = "NormalFloat:NormalFloat,FloatBorder:FloatBorder",
-  --         },
-  --       },
-  --     },
-  --   },
-  -- },
   {
     "chrisgrieser/nvim-chainsaw",
     enabled = true,
     opts = {
-      marker = "[TESTING]",
+      marker = "Jude>>>> ",
       logStatements = {
         messageLog = {
-          javascript = 'console.log("%s");',
+          javascript = {
+            "/* prettier-ignore */ // %s",
+            'console.log("%s %s:", %s);',
+          },
+          typescript = {
+            "/* prettier-ignore */ // %s",
+            'console.log("%s %s:", %s);',
+          },
           go = 'fmt.Print("%s")',
+          python = 'print("%s")',
         },
       },
     },
@@ -464,15 +399,7 @@ return {
       {
         "<leader>p",
         function()
-          require("chainsaw").messageLog()
-        end,
-        desc = "open scratch terminal",
-        mode = "n",
-      },
-      {
-        "<leader>P",
-        function()
-          require("chainsaw").variableLog()
+          require("chainsaw").objectLog()
         end,
         desc = "open scratch terminal",
         mode = "n",
@@ -501,7 +428,7 @@ return {
     "akinsho/toggleterm.nvim",
     enabled = true,
     config = function()
-      vim.keymap.del('t', '<esc><esc>')
+      vim.keymap.del("t", "<esc><esc>")
       require("toggleterm").setup({
         direction = "float",
         auto_scroll = false,
@@ -625,7 +552,7 @@ return {
       cmp.setup({
         snippet = {
           expand = function(args)
-            require('luasnip').lsp_expand(args.body)
+            vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
           end,
         },
         window = {
@@ -652,15 +579,12 @@ return {
             sources = cmp.config.sources({
               { name = "cmp_git" }, -- You can specify the `cmp_git` source if you were installed it.
             }, {
-              { name = "buffer" },
+              { name = "spell" },
             }),
           }),
         }),
         sources = cmp.config.sources({
           { name = "nvim_lsp" },
-          -- { name = "vsnip" },
-        }, {
-          { name = "spell" },
         }),
       })
     end,
@@ -678,7 +602,7 @@ return {
       table.insert(opts.ensure_installed, "isort")
     end,
   },
-  { "williamboman/mason-lspconfig.nvim", enabled = true },
+  { "williamboman/mason-lspconfig.nvim",           enabled = true },
   {
     "neovim/nvim-lspconfig",
     enabled = true,
@@ -762,7 +686,7 @@ return {
       },
     },
   },
-  { "stevearc/dressing.nvim",            enabled = true }, --this makes the rename dialog appear right over the thing you're renaming instead of the command line
+  { "stevearc/dressing.nvim", enabled = true }, --this makes the rename dialog appear right over the thing you're renaming instead of the command line
   {
     "akinsho/bufferline.nvim",
     enabled = true,
