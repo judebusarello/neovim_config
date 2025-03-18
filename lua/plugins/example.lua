@@ -14,6 +14,8 @@ vim.opt.smartindent = false
 --:set foldmethod=expr
 --foldexpr=nvim_treesitter#foldexpr()
 --
+--
+--
 return {
   {
     "catppuccin/nvim",
@@ -23,16 +25,18 @@ return {
   { "tpope/vim-fugitive",                      enabled = true },            -- Git integration for Vim
   { "junegunn/fzf",                            build = "./install --bin" }, -- Fuzzy finder for files, buffers, etc.
   { "neovim/nvim-lspconfig",                   enabled = true },            -- Quickstart configurations for the Nvim LSP client
-  { "hrsh7th/cmp-nvim-lsp",                    enabled = true },            -- Completion source for nvim-cmp based on LSP
+  { "hrsh7th/cmp-nvim-lsp",                    enabled = false },           -- Completion source for nvim-cmp based on LSP
   { "Bekaboo/deadcolumn.nvim",                 enabled = true },            -- Show colorcolumn as you approach
   { "echasnovski/mini.comment",                enabled = true },            -- Comment out visual selection
   { "hrsh7th/vim-vsnip",                       enabled = true },            -- Snippet plugin for Vim
-  { "hrsh7th/cmp-vsnip",                       enabled = true },            -- Vsnip completion source for nvim-cmp
+  { "hrsh7th/cmp-vsnip",                       enabled = false },           -- Vsnip completion source for nvim-cmp
   { "nvim-lua/plenary.nvim",                   enabled = true },            -- Lua utility functions for Neovim
   { "L3MON4D3/LuaSnip",                        enabled = false },           -- Snippet engine for Neovim written in Lua
   { "HiPhish/nvim-ts-rainbow2",                enabled = false },           -- Colorize parens and brackets
   { "lukas-reineke/indent-blankline.nvim",     enabled = false },           -- Adds indentation guides to all lines
   { "folke/trouble.nvim",                      enabled = false },           -- A pretty list for showing diagnostics, references, etc.
+  { "folke/lazy.nvim",                         enabled = true },            -- A pretty list for showing diagnostics, references, etc.
+  { "folke/lazydev.nvim",                      enabled = true },            -- A pretty list for showing diagnostics, references, etc.
   { "folke/todo-comments.nvim",                enabled = false },           -- Highlight and list TODO comments
   { "zbirenbaum/copilot-cmp",                  enabled = false },           -- Copilot integration with nvim-cmp
   { "zbirenbaum/copilot.lua",                  enabled = false },           -- Copilot integration for Neovim
@@ -63,6 +67,19 @@ return {
   { "windwp/nvim-autopairs",                   enabled = false },           -- Autocompletion for paired characters
   { "nvim-telescope/telescope.nvim",           enabled = false },           -- FZF-like searcher
   {
+    "folke/snacks.nvim",
+    enabled = true,
+    opts = {
+      indent = { enabled = false },
+      input = { enabled = false },
+      notifier = { enabled = false },
+      scope = { enabled = false },
+      scroll = { enabled = false },
+      statuscolumn = { enabled = false }, -- we set this in options.lua
+      words = { enabled = false },
+    }
+  }, -- A pretty list for showing diagnostics, references, etc.
+  {
     "antosha417/nvim-lsp-file-operations",
     dependencies = {
       "nvim-lua/plenary.nvim",
@@ -80,27 +97,70 @@ return {
     },
   },
   {
+    "sindrets/diffview.nvim",
+    enabled = true,
+    opts = {
+      keymaps = {
+        file_panel = {
+          {
+            "n",
+            "cc",
+            function()
+              vim.ui.input({ prompt = "Commit message: " }, function(msg)
+                if not msg then
+                  return
+                end
+                local results = vim
+                    .system({ "git", "commit", "-m", msg }, { text = true })
+                    :wait()
+
+                if results.code ~= 0 then
+                  vim.notify(
+                    "Commit failed with the message: \n"
+                    .. vim.trim(results.stdout .. "\n" .. results.stderr),
+                    vim.log.levels.ERROR,
+                    { title = "Commit" }
+                  )
+                else
+                  vim.notify(
+                    results.stdout,
+                    vim.log.levels.INFO,
+                    { title = "Commit" }
+                  )
+                end
+              end)
+            end,
+          },
+        },
+      },
+    },
+  },
+  {
     "bakks/butterfish.nvim",
     enabled = true,
     dependencies = { "tpope/vim-commentary" },
     keys = {
       {
-        "Q",
-        ":BFQuestion ",
+        "E",
+        function()
+          vim.ui.input({ prompt = "Ask A Question" }, function(msg)
+            local butterfish = require("butterfish")
+            butterfish.question(vim.fn.line("'<"), vim.fn.line("'>"), msg)
+          end)
+        end,
         mode = { "v" },
         desc = "Butterfish Question",
       },
       {
         "R",
-        ":BFRewrite ",
+        function()
+          vim.ui.input({ prompt = "Describe The Rewrite" }, function(msg)
+            local butterfish = require("butterfish")
+            butterfish.rewrite(vim.fn.line("'<"), vim.fn.line("'>"), msg)
+          end)
+        end,
         mode = { "v" },
         desc = "Butterfish Rewrite",
-      },
-      {
-        "E",
-        ":BFComment<CR>",
-        mode = { "v" },
-        desc = "Butterfish Comment",
       },
       -- { "<leader>ae", ":BFExplain<CR>",   mode = { "n" },                 desc = "Butterfish Explain" },
       -- { "<leader>ae", ":BFExplain<CR>",   mode = { "v" },                 desc = "Butterfish Explain" },
@@ -114,6 +174,9 @@ return {
       -- butterfish.lm_base_path = "http://localhost:1234/v1"
       -- butterfish.lm_fast_model = "ZeroWw/microsoft_WizardLM-2-7B-GGUF"
       -- butterfish.lm_smart_model = "ZeroWw/microsoft_WizardLM-2-7B-GGUF"
+      butterfish.lm_base_path = "https://api.openai.com/v1"
+      butterfish.lm_fast_model = "gpt-4o-2024-11-20"
+      butterfish.lm_smart_model = "gpt-4o-2024-11-20"
       butterfish.active_color_group = "User1"
       butterfish.active_color_cterm = "8"
       butterfish.active_color_gui = "#808080"
@@ -210,7 +273,7 @@ return {
       require("advanced_git_search.fzf").setup({
         {
           -- fugitive or diffview
-          diff_plugin = "fugitive",
+          diff_plugin = "diffview",
           -- customize git in previewer
           -- e.g. flags such as { "--no-pager" }, or { "-c", "delta.side-by-side=false" }
           git_flags = {},
@@ -275,6 +338,10 @@ return {
     config = function()
       require("fzf-lua").setup({
         "max-perf",
+        -- grep = {
+        --   glob_flag = "--iglob",     -- for case sensitive globs use '--glob'
+        --   glob_separator = "%s%-%-", -- query separator pattern (lua): ' --'
+        -- },
         winopts = {
           -- border = "FloatBorder",
           width = 0.9,
@@ -301,14 +368,7 @@ return {
         mode = "n",
       },
       {
-        "<leader>e",
-        function()
-          require("fzf-lua").files({ cwd = vim.api.nvim_buf_get_name(0) })
-        end,
-        mode = "n",
-      },
-      {
-        "<leader>f",
+        "f",
         function()
           require("fzf-lua").grep_visual({ multiprocess = true })
         end,
@@ -331,14 +391,20 @@ return {
       {
         "<leader>o",
         function()
-          require("fzf-lua").oldfiles({ multiprocess = true })
+          require("fzf-lua").oldfiles({
+            include_current_session = true,
+            multiprocess = true,
+          })
         end,
         mode = "n",
       },
       {
         "<leader>/",
         function()
-          require("fzf-lua").grep_project({ multiprocess = true })
+          require("fzf-lua").grep({
+            search = "",
+            fzf_opts = { ["--nth"] = "2.." },
+          })
         end,
         mode = "n",
       },
@@ -428,7 +494,6 @@ return {
     "akinsho/toggleterm.nvim",
     enabled = true,
     config = function()
-      vim.keymap.del("t", "<esc><esc>")
       require("toggleterm").setup({
         direction = "float",
         auto_scroll = false,
@@ -477,7 +542,7 @@ return {
         mode = "n",
       },
       {
-        "<S-esc>",
+        "<S-enter>",
         function()
           local terms = require("toggleterm.terminal")
           local terminals = terms.get_all()
@@ -504,7 +569,7 @@ return {
         "<leader>G",
         function()
           local Terminal = require("toggleterm.terminal").Terminal
-          local lazygit = Terminal:new({ id = 999999998, cmd = "lazygit" })
+          local lazygit = Terminal:new({ id = 999999998, cmd = "lazygit", direction = "float" })
           lazygit:toggle()
         end,
         desc = "open lazygit",
@@ -514,10 +579,11 @@ return {
         "<leader>D",
         function()
           local Terminal = require("toggleterm.terminal").Terminal
-          local lazygit = Terminal:new({ id = 999999997, cmd = "lazydocker" })
-          lazygit:toggle()
+          local lazydocker =
+              Terminal:new({ id = 999999997, cmd = "lazydocker", direction = "float" })
+          lazydocker:toggle()
         end,
-        desc = "open lazygit",
+        desc = "open lazydocker",
         mode = "n",
       },
       {
@@ -525,17 +591,17 @@ return {
         function()
           local Terminal = require("toggleterm.terminal").Terminal
           local githubdashboard =
-              Terminal:new({ id = 999999996, cmd = "gh dash" })
+              Terminal:new({ id = 999999996, cmd = "gh dash", direction = "float" })
           githubdashboard:toggle()
         end,
-        desc = "open lazygit",
+        desc = "open github dash",
         mode = "n",
       },
     },
   },
   {
     "hrsh7th/nvim-cmp",
-    enabled = true,
+    enabled = false,
     config = function()
       local cmp = require("cmp")
       local has_words_before = function()
@@ -593,12 +659,14 @@ return {
     "williamboman/mason.nvim",
     opts = function(_, opts)
       table.insert(opts.ensure_installed, "prettier")
+
       table.insert(opts.ensure_installed, "buildifier")
       table.insert(opts.ensure_installed, "gopls")
       table.insert(opts.ensure_installed, "json-lsp")
       table.insert(opts.ensure_installed, "lua-language-server")
       table.insert(opts.ensure_installed, "python-lsp-server")
-      table.insert(opts.ensure_installed, "typescript-language-server")
+      table.insert(opts.ensure_installed, "vtsls")
+      -- table.insert(opts.ensure_installed, "typescript-language-server")
       table.insert(opts.ensure_installed, "isort")
     end,
   },
@@ -696,6 +764,7 @@ return {
         show_close_icon = true,
         separator_style = "slant",
         always_show_bufferline = false,
+        view = "tabs",
       },
     },
     keys = {
@@ -704,12 +773,6 @@ return {
         ":bp|bd #<CR>",
         mode = { "n", "v" },
         desc = "Delete Buffer",
-      },
-      {
-        "<leader>h",
-        "gt",
-        mode = { "n", "v" },
-        desc = "switch tab",
       },
     },
   },
@@ -775,5 +838,90 @@ return {
         },
       })
     end,
+  },
+  {
+    "daliusd/ghlite.nvim",
+    config = function()
+      require("ghlite").setup({
+        debug = false,           -- if set to true debugging information is written to ~/.ghlite.log file
+        view_split = "vsplit",   -- set to empty string '' to open in active buffer
+        diff_split = "vsplit",   -- set to empty string '' to open in active buffer
+        comment_split = "split", -- set to empty string '' to open in active buffer
+        open_command = "open",   -- open command to use, e.g. on Linux you might want to use xdg-open
+        keymaps = {              -- override default keymaps with the ones you prefer
+          diff = {
+            open_file = "gf",
+            open_file_tab = "gt",
+            open_file_split = "gs",
+            open_file_vsplit = "gv",
+            approve = "<C-A>",
+          },
+          comment = {
+            send_comment = "<C-CR>",
+          },
+          pr = {
+            approve = "<C-A>",
+          },
+        },
+      })
+    end,
+    keys = {
+      { "<leader>us", ":GHLitePRSelect<cr>",        silent = true },
+      { "<leader>uo", ":GHLitePRCheckout<cr>",      silent = true },
+      { "<leader>uv", ":GHLitePRView<cr>",          silent = true },
+      { "<leader>uu", ":GHLitePRLoadComments<cr>",  silent = true },
+      { "<leader>up", ":GHLitePRDiff<cr>",          silent = true },
+      { "<leader>ul", ":GHLitePRDiffview<cr>",      silent = true },
+      { "<leader>ua", ":GHLitePRAddComment<cr>",    silent = true },
+      { "<leader>uc", ":GHLitePRUpdateComment<cr>", silent = true },
+      { "<leader>ud", ":GHLitePRDeleteComment<cr>", silent = true },
+      { "<leader>ug", ":GHLitePROpenComment<cr>",   silent = true },
+    },
+  },
+  {
+    "saghen/blink.cmp",
+    lazy = false, -- lazy loading handled internally
+    dependencies = "rafamadriz/friendly-snippets",
+    version = "v0.*",
+    opts = {
+      -- keymap = {
+      --   accept = ";",
+      --   select_prev = { "<S-Tab>" },
+      --   select_next = { "<Tab>" },
+      -- },
+      -- highlight = {
+      --   use_nvim_cmp_as_default = true,
+      -- },
+      -- nerd_font_variant = "normal",
+      -- accept = {
+      --   auto_brackets = {
+      --     enabled = true,
+      --   },
+      -- },
+      -- windows = {
+      --   autocomplete = {
+      --     draw = "minimal",
+      --   },
+      --   documentation = {
+      --     auto_show = true,
+      --   },
+      -- },
+      -- documentation = {
+      --   auto_show = true,
+      --   auto_show_delay_ms = 50,
+      --   update_delay_ms = 50,
+      -- },
+      -- signature_help = {
+      --   enabled = true,
+      --   blocked_trigger_characters = {},
+      --   blocked_retrigger_characters = {},
+      --   -- when true, will show the signature help window when the cursor comes after a trigger character when entering insert mode
+      --   show_on_insert_on_trigger_character = true,
+      -- },
+      -- cycle = {
+      --   from_bottom = false,
+      --   from_top = false,
+      -- },
+    },
   },
 }
