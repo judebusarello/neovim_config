@@ -14,22 +14,88 @@ vim.opt.smartindent = false
 --:set foldmethod=expr
 --foldexpr=nvim_treesitter#foldexpr()
 --
---
---
 return {
   {
     "catppuccin/nvim",
     name = "catppuccin",
     priority = 1000,
   },
-  { "tpope/vim-fugitive",                      enabled = true },            -- Git integration for Vim
+  {
+    "tpope/vim-fugitive",
+    enabled = true,
+    config = function()
+      -- Function to blame the current line and open the corresponding commit in git fugitive
+      local function gblameline()
+        local lineno = vim.api.nvim_win_get_cursor(0)[1] -- Get the current line number
+        local filename = vim.api.nvim_buf_get_name(0)    -- Get the current buffer's file name
+
+        -- Execute git blame for the current line
+        local output = vim.fn.system({
+          "git", "blame", "-L", lineno .. "," .. lineno, filename
+        })
+
+        if vim.v.shell_error ~= 0 then
+          vim.notify("Shell error: " .. vim.fn.trim(output), vim.log.levels.ERROR)
+          return
+        end
+
+        -- Extract the commit hash from the git blame output
+        local blame_hash = string.match(vim.fn.trim(output), "^%S+")
+        if blame_hash and blame_hash ~= "" then
+          -- Open the commit in git fugitive
+          vim.cmd("Gedit " .. blame_hash)
+        else
+          vim.notify("Unable to extract commit hash from git blame output", vim.log.levels.ERROR)
+        end
+      end
+
+      -- Keymap to blame the current line and open it in git fugitive
+      vim.keymap.set(
+        "n",
+        "<leader>GL",
+        gblameline,
+        { desc = "Blame current line and open in git fugitive" }
+      )
+      local function gbrowseline()
+        local lineno = vim.api.nvim_win_get_cursor(0)[1] -- Get the current line number
+        local filename = vim.api.nvim_buf_get_name(0)    -- Get the current buffer's file name
+
+        -- Execute git blame for the current line
+        local output = vim.fn.system({
+          "git", "blame", "-L", lineno .. "," .. lineno, filename
+        })
+
+        if vim.v.shell_error ~= 0 then
+          vim.notify("Shell error: " .. vim.fn.trim(output), vim.log.levels.ERROR)
+          return
+        end
+
+        -- Extract the commit hash from the git blame output
+        local blame_hash = string.match(vim.fn.trim(output), "^%S+")
+        if blame_hash and blame_hash ~= "" then
+          -- Execute GBrowse with the commit hash
+          vim.cmd("GBrowse " .. blame_hash)
+        else
+          vim.notify("Unable to extract commit hash from git blame output", vim.log.levels.ERROR)
+        end
+      end
+
+      -- Keymap to blame the current line and open it in Gbrowse
+      vim.keymap.set(
+        "n",
+        "c",
+        gbrowseline,
+        { desc = "Blame current line and open in Gbrowse" }
+      )
+    end
+  },
   { "junegunn/fzf",                            build = "./install --bin" }, -- Fuzzy finder for files, buffers, etc.
   { "neovim/nvim-lspconfig",                   enabled = true },            -- Quickstart configurations for the Nvim LSP client
-  { "hrsh7th/cmp-nvim-lsp",                    enabled = false },           -- Completion source for nvim-cmp based on LSP
+  { "hrsh7th/cmp-nvim-lsp",                    enabled = true },            -- Completion source for nvim-icmp based on LSP
   { "Bekaboo/deadcolumn.nvim",                 enabled = true },            -- Show colorcolumn as you approach
   { "echasnovski/mini.comment",                enabled = true },            -- Comment out visual selection
   { "hrsh7th/vim-vsnip",                       enabled = true },            -- Snippet plugin for Vim
-  { "hrsh7th/cmp-vsnip",                       enabled = false },           -- Vsnip completion source for nvim-cmp
+  { "hrsh7th/cmp-vsnip",                       enabled = true },            -- Vsnip completion source for nvim-cmp
   { "nvim-lua/plenary.nvim",                   enabled = true },            -- Lua utility functions for Neovim
   { "L3MON4D3/LuaSnip",                        enabled = false },           -- Snippet engine for Neovim written in Lua
   { "HiPhish/nvim-ts-rainbow2",                enabled = false },           -- Colorize parens and brackets
@@ -77,7 +143,7 @@ return {
       scroll = { enabled = false },
       statuscolumn = { enabled = false }, -- we set this in options.lua
       words = { enabled = false },
-    }
+    },
   }, -- A pretty list for showing diagnostics, references, etc.
   {
     "antosha417/nvim-lsp-file-operations",
@@ -94,45 +160,6 @@ return {
     enabled = true,
     opts = {
       colorscheme = "catppuccin-macchiato",
-    },
-  },
-  {
-    "sindrets/diffview.nvim",
-    enabled = true,
-    opts = {
-      keymaps = {
-        file_panel = {
-          {
-            "n",
-            "cc",
-            function()
-              vim.ui.input({ prompt = "Commit message: " }, function(msg)
-                if not msg then
-                  return
-                end
-                local results = vim
-                    .system({ "git", "commit", "-m", msg }, { text = true })
-                    :wait()
-
-                if results.code ~= 0 then
-                  vim.notify(
-                    "Commit failed with the message: \n"
-                    .. vim.trim(results.stdout .. "\n" .. results.stderr),
-                    vim.log.levels.ERROR,
-                    { title = "Commit" }
-                  )
-                else
-                  vim.notify(
-                    results.stdout,
-                    vim.log.levels.INFO,
-                    { title = "Commit" }
-                  )
-                end
-              end)
-            end,
-          },
-        },
-      },
     },
   },
   {
@@ -183,91 +210,6 @@ return {
     end,
   },
   {
-    "pwntester/octo.nvim",
-    enabled = true,
-    lazy = false,
-    config = function()
-      require("octo").setup({
-        picker = "fzf-lua",
-        enable_builtin = true,
-        use_local_fs = true,
-        comment_icon = "💬",
-        snippet_context_lines = 10,
-        mappings = {
-          review_diff = {
-            next_thread = { lhs = "t", desc = "move to next thread" },
-            prev_thread = { lhs = "T", desc = "move to previous thread" },
-            add_review_comment = {
-              lhs = "c",
-              desc = "add a new review comment",
-            },
-            select_next_entry = {
-              lhs = ">",
-              desc = "move to previous changed file",
-            },
-            select_prev_entry = {
-              lhs = "<",
-              desc = "move to next changed file",
-            },
-            close_review_tab = { lhs = "<leader>x", desc = "close review tab" },
-          },
-          review_thread = {
-            add_comment = { lhs = "c", desc = "add comment" },
-            add_suggestion = { lhs = "C", desc = "add suggestions" },
-            delete_comment = { lhs = "d", desc = "delete comment" },
-            next_comment = { lhs = "t", desc = "go to next comment" },
-            prev_comment = { lhs = "T", desc = "go to previous comment" },
-            select_next_entry = {
-              lhs = "n",
-              desc = "move to previous changed file",
-            },
-            select_prev_entry = {
-              lhs = "N",
-              desc = "move to next changed file",
-            },
-            close_review_tab = { lhs = "x", desc = "close review tab" },
-          },
-          submit_win = {
-            approve_review = { lhs = "P", desc = "approve review" },
-            comment_review = { lhs = "p", desc = "comment review" },
-            request_changes = { lhs = "pp", desc = "request changes review" },
-            close_review_tab = { lhs = "x", desc = "close review tab" },
-          },
-          pull_request = {
-            squash_and_merge_pr = {
-              lhs = "<space>psm",
-              desc = "squash and merge PR",
-            },
-            list_changed_files = {
-              lhs = "<space>pf",
-              desc = "list PR changed files",
-            },
-            show_pr_diff = { lhs = "<space>pd", desc = "show PR diff" },
-            add_reviewer = { lhs = "r", desc = "add reviewer" },
-            add_comment = { lhs = "c", desc = "add comment" },
-            delete_comment = { lhs = "d", desc = "delete comment" },
-          },
-        },
-        picker_config = {
-          use_emojis = true, -- only used by "fzf-lua" picker for now
-          mappings = {       -- mappings for the pickers
-            open_in_browser = { lhs = "<C-b>", desc = "open issue in browser" },
-            copy_url = { lhs = "<C-y>", desc = "copy url to system clipboard" },
-            checkout_pr = { lhs = "<C-o>", desc = "checkout pull request" },
-            merge_pr = { lhs = "<C-r>", desc = "merge pull request" },
-          },
-        },
-        file_panel = {
-          size = 5,         -- changed files panel rows
-          use_icons = true, -- use web-devicons in file panel (if false, nvim-web-devicons does not need to be installed)
-        },
-      })
-      vim.keymap.set("i", "@", "@<C-x><C-o>", { silent = true, buffer = true })
-      vim.keymap.set("i", "#", "#<C-x><C-o>", { silent = true, buffer = true })
-    end,
-  },
-
-  {
     "aaronhallaert/advanced-git-search.nvim",
     config = function()
       require("advanced_git_search.fzf").setup({
@@ -291,28 +233,6 @@ return {
       "tpope/vim-rhubarb",
     },
   },
-
-  -- { "jose-elias-alvarez/null-ls.nvim",     enabled = false },
-  -- { "elentok/format-on-save.nvim" },
-  -- {
-  --   "nvimdev/guard.nvim",
-  --   enabled = true,
-  --   config = function()
-  --     local ft = require("guard.filetype")
-  --     ft("python"):fmt({
-  --       cmd = "/home/jude/vistar/ci/fmt-python",
-  --       args = { "fix" },
-  --       fname = false,
-  --       stdin = false,
-  --     })
-  --     require("guard").setup({})
-  --   end,
-  --   opts = {
-  --     fmt_on_save = false,
-  --     lsp_as_default_formatter = false,
-  --   },
-  -- },
-  --
   {
     "simonmclean/triptych.nvim",
     event = "VeryLazy",
@@ -338,8 +258,25 @@ return {
     config = function()
       require("fzf-lua").setup({
         "max-perf",
+        previewers = {
+          builtin = {
+            -- fzf-lua is very fast, but it really struggled to preview a couple files
+            -- in a repo. Those files were very big JavaScript files (1MB, minified, all on a single line).
+            -- It turns out it was Treesitter having trouble parsing the files.
+            -- With this change, the previewer will not add syntax highlighting to files larger than 100KB
+            -- (Yes, I know you shouldn't have 100KB minified files in source control.)
+            syntax_limit_b = 1024 * 100, -- 100KB
+          },
+        },
         -- grep = {
-        --   glob_flag = "--iglob",     -- for case sensitive globs use '--glob'
+        --   -- One thing I missed from Telescope was the ability to live_grep and the
+        --   -- run a filter on the filenames.
+        --   -- Ex: Find all occurrences of "enable" but only in the "plugins" directory.
+        --   -- With this change, I can sort of get the same behaviour in live_grep.
+        --   -- ex: > enable --*/plugins/*
+        --   -- I still find this a bit cumbersome. There's probably a better way of doing this.
+        --   rg_glob = true, -- enable glob parsing
+        --   glob_flag = "--iglob", -- case insensitive globs
         --   glob_separator = "%s%-%-", -- query separator pattern (lua): ' --'
         -- },
         winopts = {
@@ -381,13 +318,13 @@ return {
         end,
         mode = "n",
       },
-      {
-        "<leader>F",
-        function()
-          require("fzf-lua").lsp_code_actions({ multiprocess = true })
-        end,
-        mode = "n",
-      },
+      -- {
+      --   "<leader>F",
+      --   function()
+      --     require("fzf-lua").lsp_code_actions({ multiprocess = true })
+      --   end,
+      --   mode = "n",
+      -- },
       {
         "<leader>o",
         function()
@@ -506,12 +443,13 @@ return {
       })
     end,
     keys = {
+      -- Scratch terminals
       {
         "<leader>j",
         function()
           require("toggleterm").toggle(1, 0, vim.loop.cwd(), "float")
         end,
-        desc = "open scratch terminal",
+        desc = "Open scratch terminal 1",
         mode = "n",
       },
       {
@@ -519,7 +457,7 @@ return {
         function()
           require("toggleterm").toggle(2, 0, vim.loop.cwd(), "float")
         end,
-        desc = "open scratch terminal",
+        desc = "Open scratch terminal 2",
         mode = "n",
       },
       {
@@ -527,81 +465,90 @@ return {
         function()
           require("toggleterm").toggle(3, 0, vim.loop.cwd(), "float")
         end,
-        desc = "open scratch terminal",
+        desc = "Open scratch terminal 3",
         mode = "n",
       },
+
+      -- Spotify CLI
       {
         "<leader>m",
         function()
           local Terminal = require("toggleterm.terminal").Terminal
-          local spotify =
-              Terminal:new({ id = 999999999, cmd = "spotify_player" })
-          spotify:toggle()
+          Terminal:new({ id = 999999999, cmd = "spotify_player" }):toggle()
         end,
-        desc = "open spotify cli",
+        desc = "Open Spotify CLI",
         mode = "n",
       },
+
+      -- Close all terminals
       {
         "<S-enter>",
         function()
-          local terms = require("toggleterm.terminal")
-          local terminals = terms.get_all()
-          for _, term in pairs(terminals) do
+          for _, term in pairs(require("toggleterm.terminal").get_all()) do
             term:close()
           end
         end,
-        desc = "close all terminals",
+        desc = "Close all terminals",
         mode = "n",
       },
       {
         "<S-esc>",
         function()
-          local terms = require("toggleterm.terminal")
-          local terminals = terms.get_all()
-          for _, term in pairs(terminals) do
+          for _, term in pairs(require("toggleterm.terminal").get_all()) do
             term:close()
           end
         end,
-        desc = "close all terminals",
+        desc = "Close all terminals (terminal mode)",
         mode = "t",
       },
+
+      -- Lazygit
       {
         "<leader>G",
         function()
           local Terminal = require("toggleterm.terminal").Terminal
-          local lazygit = Terminal:new({ id = 999999998, cmd = "lazygit", direction = "float" })
-          lazygit:toggle()
+          Terminal:new({ id = 999999998, cmd = "lazygit", direction = "float" })
+              :toggle()
         end,
-        desc = "open lazygit",
+        desc = "Open Lazygit",
         mode = "n",
       },
+
+      -- Lazydocker
       {
         "<leader>D",
         function()
           local Terminal = require("toggleterm.terminal").Terminal
-          local lazydocker =
-              Terminal:new({ id = 999999997, cmd = "lazydocker", direction = "float" })
-          lazydocker:toggle()
+          Terminal
+              :new({ id = 999999997, cmd = "lazydocker", direction = "float" })
+              :toggle()
         end,
-        desc = "open lazydocker",
+        desc = "Open Lazydocker",
         mode = "n",
       },
+
+      -- GitHub Dashboard
       {
         "<leader>g",
         function()
           local Terminal = require("toggleterm.terminal").Terminal
-          local githubdashboard =
-              Terminal:new({ id = 999999996, cmd = "gh dash", direction = "float" })
-          githubdashboard:toggle()
+          Terminal:new({ id = 999999996, cmd = "gh dash", direction = "float" })
+              :toggle()
         end,
-        desc = "open github dash",
+        desc = "Open GitHub Dashboard",
         mode = "n",
       },
     },
   },
   {
     "hrsh7th/nvim-cmp",
-    enabled = false,
+    enabled = true,
+    event = "InsertEnter",
+    dependencies = {
+      { "hrsh7th/cmp-nvim-lsp" },
+      { "hrsh7th/cmp-vsnip" },
+      { "hrsh7th/vim-vsnip" }
+    },
     config = function()
       local cmp = require("cmp")
       local has_words_before = function()
@@ -618,7 +565,8 @@ return {
       cmp.setup({
         snippet = {
           expand = function(args)
-            vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
+            -- Comes from vsnip
+            vim.fn["vsnip#anonymous"](args.body)
           end,
         },
         window = {
@@ -640,34 +588,57 @@ return {
               fallback()
             end
           end),
-          -- Set configuration for specific filetype.
-          cmp.setup.filetype("gitcommit", {
-            sources = cmp.config.sources({
-              { name = "cmp_git" }, -- You can specify the `cmp_git` source if you were installed it.
-            }, {
-              { name = "spell" },
-            }),
-          }),
         }),
         sources = cmp.config.sources({
           { name = "nvim_lsp" },
+          { name = "vsnip" },
         }),
       })
     end,
   },
   {
+    "scalameta/nvim-metals",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+    },
+    ft = { "scala", "sbt", "java" },
+    opts = function()
+      local metals_config = require("metals").bare_config()
+      metals_config.on_attach = function(client, bufnr)
+        -- your on_attach function
+      end
+
+      return metals_config
+    end,
+    config = function(self, metals_config)
+      local nvim_metals_group = vim.api.nvim_create_augroup("nvim-metals", { clear = true })
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = self.ft,
+        callback = function()
+          require("metals").initialize_or_attach(metals_config)
+        end,
+        group = nvim_metals_group,
+      })
+    end
+  },
+  {
     "williamboman/mason.nvim",
     opts = function(_, opts)
-      table.insert(opts.ensure_installed, "prettier")
+      local tools = {
+        "prettier",
+        "buildifier",
+        "gopls",
+        "json-lsp",
+        "lua-language-server",
+        "python-lsp-server",
+        "vtsls",
+        "isort",
+      }
 
-      table.insert(opts.ensure_installed, "buildifier")
-      table.insert(opts.ensure_installed, "gopls")
-      table.insert(opts.ensure_installed, "json-lsp")
-      table.insert(opts.ensure_installed, "lua-language-server")
-      table.insert(opts.ensure_installed, "python-lsp-server")
-      table.insert(opts.ensure_installed, "vtsls")
-      -- table.insert(opts.ensure_installed, "typescript-language-server")
-      table.insert(opts.ensure_installed, "isort")
+      -- Add each tool to the ensure_installed list
+      for _, tool in ipairs(tools) do
+        table.insert(opts.ensure_installed, tool)
+      end
     end,
   },
   { "williamboman/mason-lspconfig.nvim",           enabled = true },
@@ -702,11 +673,31 @@ return {
     },
     opts = {
       servers = {
+        metals = {
+          settings = {
+            metals = {
+              superMethodLensesEnabled = true,
+              showImplicitArguments = true,
+              excludedPackages = {
+                "akka.actor.typed.javadsl",
+                "com.github.swagger.akka.javadsl",
+              },
+            },
+          },
+          init_options = {
+            statusBarProvider = "on",
+            isHttpEnabled = true,
+          },
+          on_attach = function(client, bufnr)
+            -- Custom on_attach logic for Metals if needed
+          end,
+        },
         gopls = {
           on_new_config = function(config, new_root_dir)
+            -- #!/usr/bin/env bash
+            -- exec bazel run -- @io_bazel_rules_go//go/tools/gopackagesdriver "${@}" 2>> "$HOME/.local/state/nvim/lsp.log" | tee "$HOME/.local/state/nvim/gopackagesdriver_stdout.log"
             local gopackagesdriver =
             "/Users/jude/vistar/tools/gopackagesdriver.sh"
-            -- ".config/nvim/lua/plugins/gopackagesdriver.sh"
             if vim.loop.fs_stat(new_root_dir) ~= nil then
               config.cmd_env = {
                 GOPACKAGESDRIVER = gopackagesdriver,
@@ -880,6 +871,7 @@ return {
   },
   {
     "saghen/blink.cmp",
+    enabled = false,
     lazy = false, -- lazy loading handled internally
     dependencies = "rafamadriz/friendly-snippets",
     version = "v0.*",
@@ -922,6 +914,76 @@ return {
       --   from_bottom = false,
       --   from_top = false,
       -- },
+    },
+  },
+  {
+    "GeorgesAlkhouri/nvim-aider",
+    cmd = "Aider",
+    -- Example key mappings for common actions:
+    keys = {
+      { "<leader>a/", "<cmd>Aider toggle<cr>",       desc = "Toggle Aider" },
+      {
+        "<leader>as",
+        "<cmd>Aider send<cr>",
+        desc = "Send to Aider",
+        mode = { "n", "v" },
+      },
+      { "<leader>ac", "<cmd>Aider command<cr>",      desc = "Aider Commands" },
+      { "<leader>ab", "<cmd>Aider buffer<cr>",       desc = "Send Buffer" },
+      { "<leader>a+", "<cmd>Aider add<cr>",          desc = "Add File" },
+      { "<leader>a-", "<cmd>Aider drop<cr>",         desc = "Drop File" },
+      { "<leader>ar", "<cmd>Aider add readonly<cr>", desc = "Add Read-Only" },
+      -- Example nvim-tree.lua integration if needed
+      {
+        "<leader>a+",
+        "<cmd>AiderTreeAddFile<cr>",
+        desc = "Add File from Tree to Aider",
+        ft = "NvimTree",
+      },
+      {
+        "<leader>a-",
+        "<cmd>AiderTreeDropFile<cr>",
+        desc = "Drop File from Tree from Aider",
+        ft = "NvimTree",
+      },
+    },
+    dependencies = {
+      "folke/snacks.nvim",
+      --- The below dependencies are optional
+      "catppuccin/nvim",
+      "nvim-tree/nvim-tree.lua",
+      --- Neo-tree integration
+      {
+        "nvim-neo-tree/neo-tree.nvim",
+        opts = function(_, opts)
+          -- Example mapping configuration (already set by default)
+          -- opts.window = {
+          --   mappings = {
+          --     ["+"] = { "nvim_aider_add", desc = "add to aider" },
+          --     ["-"] = { "nvim_aider_drop", desc = "drop from aider" }
+          --     ["="] = { "nvim_aider_add_read_only", desc = "add read-only to aider" }
+          --   }
+          -- }
+          require("nvim_aider.neo_tree").setup(opts)
+        end,
+      },
+    },
+    config = true,
+  },
+  {
+    "nvim-neo-tree/neo-tree.nvim",
+    branch = "v3.x",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
+      "MunifTanjim/nui.nvim",
+      -- {"3rd/image.nvim", opts = {}}, -- Optional image support in preview window: See `# Preview Mode` for more information
+    },
+    lazy = false, -- neo-tree will lazily load itself
+    ---@module "neo-tree"
+    ---@type neotree.Config?
+    opts = {
+      -- fill any relevant options here
     },
   },
 }
