@@ -31,11 +31,18 @@ return {
 
         -- Execute git blame for the current line
         local output = vim.fn.system({
-          "git", "blame", "-L", lineno .. "," .. lineno, filename
+          "git",
+          "blame",
+          "-L",
+          lineno .. "," .. lineno,
+          filename,
         })
 
         if vim.v.shell_error ~= 0 then
-          vim.notify("Shell error: " .. vim.fn.trim(output), vim.log.levels.ERROR)
+          vim.notify(
+            "Shell error: " .. vim.fn.trim(output),
+            vim.log.levels.ERROR
+          )
           return
         end
 
@@ -45,7 +52,10 @@ return {
           -- Open the commit in git fugitive
           vim.cmd("Gedit " .. blame_hash)
         else
-          vim.notify("Unable to extract commit hash from git blame output", vim.log.levels.ERROR)
+          vim.notify(
+            "Unable to extract commit hash from git blame output",
+            vim.log.levels.ERROR
+          )
         end
       end
 
@@ -62,11 +72,18 @@ return {
 
         -- Execute git blame for the current line
         local output = vim.fn.system({
-          "git", "blame", "-L", lineno .. "," .. lineno, filename
+          "git",
+          "blame",
+          "-L",
+          lineno .. "," .. lineno,
+          filename,
         })
 
         if vim.v.shell_error ~= 0 then
-          vim.notify("Shell error: " .. vim.fn.trim(output), vim.log.levels.ERROR)
+          vim.notify(
+            "Shell error: " .. vim.fn.trim(output),
+            vim.log.levels.ERROR
+          )
           return
         end
 
@@ -76,7 +93,10 @@ return {
           -- Execute GBrowse with the commit hash
           vim.cmd("GBrowse " .. blame_hash)
         else
-          vim.notify("Unable to extract commit hash from git blame output", vim.log.levels.ERROR)
+          vim.notify(
+            "Unable to extract commit hash from git blame output",
+            vim.log.levels.ERROR
+          )
         end
       end
 
@@ -87,7 +107,7 @@ return {
         gbrowseline,
         { desc = "Blame current line and open in Gbrowse" }
       )
-    end
+    end,
   },
   { "junegunn/fzf",                            build = "./install --bin" }, -- Fuzzy finder for files, buffers, etc.
   { "neovim/nvim-lspconfig",                   enabled = true },            -- Quickstart configurations for the Nvim LSP client
@@ -240,7 +260,11 @@ return {
       "nvim-lua/plenary.nvim",
     },
     config = function()
-      require("triptych").setup({})
+      require("triptych").setup({
+        mappings = {
+          quit = "<S-esc>", -- Rebind the quit button to Shift-Escape
+        }
+      })
     end,
     keys = {
       {
@@ -268,20 +292,14 @@ return {
             syntax_limit_b = 1024 * 100, -- 100KB
           },
         },
-        -- grep = {
-        --   -- One thing I missed from Telescope was the ability to live_grep and the
-        --   -- run a filter on the filenames.
-        --   -- Ex: Find all occurrences of "enable" but only in the "plugins" directory.
-        --   -- With this change, I can sort of get the same behaviour in live_grep.
-        --   -- ex: > enable --*/plugins/*
-        --   -- I still find this a bit cumbersome. There's probably a better way of doing this.
-        --   rg_glob = true, -- enable glob parsing
-        --   glob_flag = "--iglob", -- case insensitive globs
-        --   glob_separator = "%s%-%-", -- query separator pattern (lua): ' --'
-        -- },
+        grep = {
+          rg_glob = true,
+          glob_flag = "--iglob",
+          glob_separator = "%s%-%-",
+        },
         winopts = {
           -- border = "FloatBorder",
-          width = 0.9,
+          width = 0.8,
           height = 0.9,
           preview = {
             -- hidden = "hidden",
@@ -318,19 +336,31 @@ return {
         end,
         mode = "n",
       },
-      -- {
-      --   "<leader>F",
-      --   function()
-      --     require("fzf-lua").lsp_code_actions({ multiprocess = true })
-      --   end,
-      --   mode = "n",
-      -- },
+      {
+        "<leader>F",
+        function()
+          require 'fzf-lua'.fzf_exec("ls", {
+            actions = {
+              ['ctrl-x'] = {
+                function(selected)
+                  for _, f in ipairs(selected) do
+                    print("deleting:", f)
+                    -- uncomment to enable deletion
+                    -- vim.fn.delete(f)
+                  end
+                end,
+                require 'fzf-lua'.actions.resume
+              }
+            }
+          })
+        end,
+        mode = "n",
+      },
       {
         "<leader>o",
         function()
           require("fzf-lua").oldfiles({
             include_current_session = true,
-            multiprocess = true,
           })
         end,
         mode = "n",
@@ -339,7 +369,19 @@ return {
         "<leader>/",
         function()
           require("fzf-lua").grep({
-            search = "",
+            search = ' -- !*cortex* !*.md !*.sql !*test* !*spec* ',
+            no_esc = true,
+            fzf_opts = { ["--nth"] = "2.." },
+          })
+        end,
+        mode = "n",
+      },
+      {
+        "<leader>\\",
+        function()
+          require("fzf-lua").grep({
+            search = ' -- !*cortex* !*.md !*.sql *test* *spec* ',
+            no_esc = true,
             fzf_opts = { ["--nth"] = "2.." },
           })
         end,
@@ -504,7 +546,7 @@ return {
 
       -- Lazygit
       {
-        "<leader>G",
+        "<leader>g",
         function()
           local Terminal = require("toggleterm.terminal").Terminal
           Terminal:new({ id = 999999998, cmd = "lazygit", direction = "float" })
@@ -514,30 +556,43 @@ return {
         mode = "n",
       },
 
-      -- Lazydocker
+      -- Oxker
       {
-        "<leader>D",
+        "<leader>d",
         function()
           local Terminal = require("toggleterm.terminal").Terminal
           Terminal
-              :new({ id = 999999997, cmd = "lazydocker", direction = "float" })
+              :new({ id = 999999997, cmd = "oxker", direction = "float" })
               :toggle()
         end,
-        desc = "Open Lazydocker",
+        desc = "Open Oxker (docker)",
         mode = "n",
       },
 
+      -- -- Lazydocker
+      -- {
+      --   "<leader>D",
+      --   function()
+      --     local Terminal = require("toggleterm.terminal").Terminal
+      --     Terminal
+      --         :new({ id = 999999997, cmd = "lazydocker", direction = "float" })
+      --         :toggle()
+      --   end,
+      --   desc = "Open Lazydocker",
+      --   mode = "n",
+      -- },
+      --
       -- GitHub Dashboard
-      {
-        "<leader>g",
-        function()
-          local Terminal = require("toggleterm.terminal").Terminal
-          Terminal:new({ id = 999999996, cmd = "gh dash", direction = "float" })
-              :toggle()
-        end,
-        desc = "Open GitHub Dashboard",
-        mode = "n",
-      },
+      -- {
+      --   "<leader>G",
+      --   function()
+      --     local Terminal = require("toggleterm.terminal").Terminal
+      --     Terminal:new({ id = 999999996, cmd = "gh dash", direction = "float" })
+      --         :toggle()
+      --   end,
+      --   desc = "Open GitHub Dashboard",
+      --   mode = "n",
+      -- },
     },
   },
   {
@@ -547,7 +602,7 @@ return {
     dependencies = {
       { "hrsh7th/cmp-nvim-lsp" },
       { "hrsh7th/cmp-vsnip" },
-      { "hrsh7th/vim-vsnip" }
+      { "hrsh7th/vim-vsnip" },
     },
     config = function()
       local cmp = require("cmp")
@@ -605,13 +660,16 @@ return {
     opts = function()
       local metals_config = require("metals").bare_config()
       metals_config.on_attach = function(client, bufnr)
-        -- your on_attach function
+        -- don't format please
+        client.resolved_capabilities.document_formatting = false      -- 0.7 and earlier
+        client.server_capabilities.documentFormattingProvider = false -- 0.8 and later
       end
 
       return metals_config
     end,
     config = function(self, metals_config)
-      local nvim_metals_group = vim.api.nvim_create_augroup("nvim-metals", { clear = true })
+      local nvim_metals_group =
+          vim.api.nvim_create_augroup("nvim-metals", { clear = true })
       vim.api.nvim_create_autocmd("FileType", {
         pattern = self.ft,
         callback = function()
@@ -619,7 +677,7 @@ return {
         end,
         group = nvim_metals_group,
       })
-    end
+    end,
   },
   {
     "williamboman/mason.nvim",
@@ -672,6 +730,7 @@ return {
       },
     },
     opts = {
+      autoformat = false,
       servers = {
         metals = {
           settings = {
@@ -764,6 +823,12 @@ return {
         ":bp|bd #<CR>",
         mode = { "n", "v" },
         desc = "Delete Buffer",
+      },
+      {
+        "<C-Tab>",
+        ":BufferLineCycleNext<CR>",
+        mode = "n",
+        desc = "Move to Next Tab",
       },
     },
   },
@@ -920,6 +985,50 @@ return {
     "GeorgesAlkhouri/nvim-aider",
     cmd = "Aider",
     -- Example key mappings for common actions:
+    config = function()
+      require("nvim_aider").setup({
+        -- Command that executes Aider
+        aider_cmd =
+        "export LM_STUDIO_API_KEY=dummy-api-key; export LM_STUDIO_API_BASE=http://desktop-3rncc6r:1234/v1; aider",
+        -- Command line arguments passed to aider
+        args = {
+          "--no-show-model-warnings",
+          "--yes-always",
+          "--no-auto-commits",
+          "--pretty",
+          "--stream",
+          "--model lm_studio/qwen3-30b-a3b",
+        },
+        -- Automatically reload buffers changed by Aider (requires vim.o.autoread = true)
+        auto_reload = false,
+        -- Theme colors (automatically uses Catppuccin flavor if available)
+        theme = {
+          user_input_color = "#a6da95",
+          tool_output_color = "#8aadf4",
+          tool_error_color = "#ed8796",
+          tool_warning_color = "#eed49f",
+          assistant_output_color = "#c6a0f6",
+          completion_menu_color = "#cad3f5",
+          completion_menu_bg_color = "#24273a",
+          completion_menu_current_color = "#181926",
+          completion_menu_current_bg_color = "#f4dbd6",
+        },
+        -- snacks.picker.layout.Config configuration
+        picker_cfg = {
+          preset = "vscode",
+        },
+        -- Other snacks.terminal.Opts options
+        config = {
+          os = { editPreset = "nvim-remote" },
+          gui = { nerdFontsVersion = "3" },
+        },
+        win = {
+          wo = { winbar = "Aider" },
+          style = "nvim_aider",
+          position = "right",
+        },
+      })
+    end,
     keys = {
       { "<leader>a/", "<cmd>Aider toggle<cr>",       desc = "Toggle Aider" },
       {
@@ -968,7 +1077,6 @@ return {
         end,
       },
     },
-    config = true,
   },
   {
     "nvim-neo-tree/neo-tree.nvim",
@@ -984,6 +1092,32 @@ return {
     ---@type neotree.Config?
     opts = {
       -- fill any relevant options here
+    },
+  },
+  {
+    'kkrampis/codex.nvim',
+    lazy = true,
+    cmd = { 'Codex', 'CodexToggle' }, -- Optional: Load only on command execution
+    keys = {
+      {
+        '<leader>cc', -- Change this to your preferred keybinding
+        function() require('codex').toggle() end,
+        desc = 'Toggle Codex popup or side-panel',
+        mode = { 'n', 't' }
+      },
+    },
+    opts = {
+      keymaps     = {
+        toggle = nil,          -- Keybind to toggle Codex window (Disabled by default, watch out for conflicts)
+        quit = '<C-q>',        -- Keybind to close the Codex window (default: Ctrl + q)
+      },                       -- Disable internal default keymap (<leader>cc -> :CodexToggle)
+      border      = 'rounded', -- Options: 'single', 'double', or 'rounded'
+      width       = 0.8,       -- Width of the floating window (0.0 to 1.0)
+      height      = 0.8,       -- Height of the floating window (0.0 to 1.0)
+      model       = nil,       -- Optional: pass a string to use a specific model (e.g., 'o3-mini')
+      autoinstall = true,      -- Automatically install the Codex CLI if not found
+      panel       = false,     -- Open Codex in a side-panel (vertical split) instead of floating window
+      use_buffer  = false,     -- Capture Codex stdout into a normal buffer instead of a terminal buffer
     },
   },
 }
