@@ -5,6 +5,13 @@ return {
     config = function()
       require("fzf-lua").setup({
         "max-perf",
+        keymap = {
+          builtin = {
+            true, -- inherit defaults
+            ["<S-Esc>"] = "hide", -- `:FzfLua resume` to continue
+            ["<M-Esc>"] = false, -- unbind default hide key
+          },
+        },
         previewers = {
           builtin = {
             -- fzf-lua is very fast, but it really struggled to preview a couple files
