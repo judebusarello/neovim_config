@@ -8,9 +8,10 @@ return {
         "<leader>c", -- Change this to your preferred keybinding
         function()
           require("codex").toggle()
+          vim.api.nvim_command("startinsert")
         end,
         desc = "Toggle Codex popup or side-panel",
-        mode = { "n", "t" },
+        mode = {"n"},
       },
     },
     opts = {

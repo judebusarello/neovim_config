@@ -7,6 +7,25 @@ return {
         direction = "float",
         auto_scroll = false,
         start_in_insert = true,
+        on_open = function(term)
+          local ok_ui, ui = pcall(require, "toggleterm.ui")
+          if not ok_ui or not ui or not term or not term.window then return end
+
+          local origin_win = ui.get_origin_window and ui.get_origin_window() or nil
+          if not origin_win or not vim.api.nvim_win_is_valid(origin_win) then return end
+          if not vim.api.nvim_win_is_valid(term.window) then return end
+
+          local origin_statusline = vim.api.nvim_get_option_value("statusline", { win = origin_win })
+          if not origin_statusline or origin_statusline == "" then
+            origin_statusline = "%<%f %h%m%r%=%-14.(%l,%c%V%) %P"
+          end
+
+          local ok_eval, evaluated =
+            pcall(vim.api.nvim_eval_statusline, origin_statusline, { winid = origin_win, maxwidth = vim.o.columns })
+          if not ok_eval or not evaluated or type(evaluated.str) ~= "string" then return end
+
+          vim.wo[term.window].statusline = evaluated.str
+        end,
         float_opts = {
           border = "curved",
           width = 300,
