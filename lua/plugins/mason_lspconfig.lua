@@ -15,13 +15,18 @@ return {
         "pylsp",
         "vtsls",
       },
-      automatic_installation = true,
+      -- mason-lspconfig.nvim no longer supports `automatic_installation` (removed upstream).
     },
     config = function(_, opts)
       local mason_lspconfig = require("mason-lspconfig")
-      mason_lspconfig.setup(opts)
+      mason_lspconfig.setup({
+        ensure_installed = opts.ensure_installed or {},
+        -- Disable mason-lspconfig's auto-enabler so we can enable exactly the servers we want.
+        automatic_enable = false,
+      })
 
-      local lspconfig = require("lspconfig")
+      -- Ensure lsp server definitions (runtime `lsp/*.lua`) are on the runtimepath.
+      pcall(require, "lspconfig")
 
       local capabilities = vim.lsp.protocol.make_client_capabilities()
       local ok_cmp, cmp_nvim_lsp = pcall(require, "cmp_nvim_lsp")
@@ -29,17 +34,14 @@ return {
         capabilities = cmp_nvim_lsp.default_capabilities(capabilities)
       end
 
+      vim.lsp.config("*", { capabilities = capabilities })
+
       local servers = {
         gopls = {
-          on_new_config = function(config, new_root_dir)
-            local gopackagesdriver = "/Users/jude/vistar/tools/gopackagesdriver.sh"
-            if vim.loop.fs_stat(new_root_dir) ~= nil then
-              config.cmd_env = {
-                GOPACKAGESDRIVER = gopackagesdriver,
-                GOPACKAGESDRIVER_BAZEL_BUILD_FLAGS = "--strategy=GoStdlibList=local",
-              }
-            end
-          end,
+          cmd_env = {
+            GOPACKAGESDRIVER = "/Users/jude/vistar/tools/gopackagesdriver.sh",
+            GOPACKAGESDRIVER_BAZEL_BUILD_FLAGS = "--strategy=GoStdlibList=local",
+          },
           settings = {
             gopls = {
               directoryFilters = {
@@ -83,14 +85,15 @@ return {
         },
       }
 
-      mason_lspconfig.setup_handlers({
-        function(server_name)
-          local server_opts = vim.tbl_deep_extend("force", {}, servers[server_name] or {})
-          server_opts.capabilities =
-            vim.tbl_deep_extend("force", {}, capabilities, server_opts.capabilities or {})
-          lspconfig[server_name].setup(server_opts)
-        end,
-      })
+      for server_name, server_opts in pairs(servers) do
+        vim.lsp.config(server_name, server_opts)
+      end
+
+      local enable_servers = {}
+      for _, server_identifier in ipairs(opts.ensure_installed or {}) do
+        table.insert(enable_servers, (server_identifier:gsub("@.*$", "")))
+      end
+      vim.lsp.enable(enable_servers)
     end,
   },
 }

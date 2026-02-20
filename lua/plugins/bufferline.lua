@@ -6,7 +6,7 @@ return {
     dependencies = { "nvim-tree/nvim-web-devicons" },
     opts = {
       options = {
-        mode = "tabs",
+        mode = "buffers",
         diagnostics = false,
         show_close_icon = true,
         separator_style = "slant",
@@ -23,12 +23,6 @@ return {
         ":bp|bd #<CR>",
         mode = { "n", "v" },
         desc = "Delete Buffer",
-      },
-      {
-        "<S-Tab>",
-        ":BufferLineCyclePrev<CR>",
-        mode = "n",
-        desc = "Move to Previous Tab",
       },
     },
   },
