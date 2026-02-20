@@ -1,3 +1,3 @@
 return {
-  { "folke/lazy.nvim", enabled = true },
+  { "folke/lazy.nvim", enabled = false },
 }
