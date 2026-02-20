@@ -59,29 +59,6 @@ return {
         desc = "Open scratch terminal 3",
         mode = "n",
       },
-
-      -- Spotify CLI
-      {
-        "<leader>m",
-        function()
-          local Terminal = require("toggleterm.terminal").Terminal
-          Terminal:new({ id = 999999999, cmd = "spotify_player" }):toggle()
-        end,
-        desc = "Open Spotify CLI",
-        mode = "n",
-      },
-
-      -- Close all terminals
-      {
-        "<S-enter>",
-        function()
-          for _, term in pairs(require("toggleterm.terminal").get_all()) do
-            term:close()
-          end
-        end,
-        desc = "Close all terminals",
-        mode = "n",
-      },
       {
         "<S-esc>",
         function()
@@ -92,7 +69,6 @@ return {
         desc = "Close all terminals (terminal mode)",
         mode = "t",
       },
-
       -- Lazygit
       {
         "<leader>g",
@@ -103,7 +79,6 @@ return {
         desc = "Open Lazygit",
         mode = "n",
       },
-
       -- Oxker
       {
         "<leader>d",
@@ -114,31 +89,6 @@ return {
         desc = "Open Oxker (docker)",
         mode = "n",
       },
-
-      -- -- Lazydocker
-      -- {
-      --   "<leader>D",
-      --   function()
-      --     local Terminal = require("toggleterm.terminal").Terminal
-      --     Terminal
-      --         :new({ id = 999999997, cmd = "lazydocker", direction = "float" })
-      --         :toggle()
-      --   end,
-      --   desc = "Open Lazydocker",
-      --   mode = "n",
-      -- },
-      --
-      -- GitHub Dashboard
-      -- {
-      --   "<leader>G",
-      --   function()
-      --     local Terminal = require("toggleterm.terminal").Terminal
-      --     Terminal:new({ id = 999999996, cmd = "gh dash", direction = "float" })
-      --         :toggle()
-      --   end,
-      --   desc = "Open GitHub Dashboard",
-      --   mode = "n",
-      -- },
     },
   },
 }
