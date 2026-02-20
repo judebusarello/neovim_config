@@ -2,15 +2,21 @@ return {
   {
     "akinsho/bufferline.nvim",
     enabled = true,
+    lazy = false,
+    dependencies = { "nvim-tree/nvim-web-devicons" },
     opts = {
       options = {
+        mode = "tabs",
         diagnostics = false,
         show_close_icon = true,
         separator_style = "slant",
-        always_show_bufferline = false,
-        view = "tabs",
+        always_show_bufferline = true,
       },
     },
+    config = function(_, opts)
+      vim.opt.showtabline = 2
+      require("bufferline").setup(opts)
+    end,
     keys = {
       {
         "x",
@@ -19,10 +25,10 @@ return {
         desc = "Delete Buffer",
       },
       {
-        "<C-Tab>",
-        ":BufferLineCycleNext<CR>",
+        "<S-Tab>",
+        ":BufferLineCyclePrev<CR>",
         mode = "n",
-        desc = "Move to Next Tab",
+        desc = "Move to Previous Tab",
       },
     },
   },
