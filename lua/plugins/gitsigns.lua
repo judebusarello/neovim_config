@@ -3,22 +3,24 @@ return {
     "lewis6991/gitsigns.nvim",
     enabled = true,
     keys = {
-      -- {
-      --   "",
-      --   function()
-      --     require("gitsigns").next_hunk()
-      --   end,
-      --   desc = "see what changed on that line based on the changes made",
-      --   mode = "n",
-      -- },
-      -- {
-      --   "",
-      --   function()
-      --     require("gitsigns").prev_hunk()
-      --   end,
-      --   desc = "see what changed on that line based on the changes made",
-      --   mode = "n",
-      -- },
+      {
+        "c",
+        function()
+          require("gitsigns").nav_hunk("next", { target = "all" })
+          vim.cmd("normal! zz")
+        end,
+        desc = "Jump to next git hunk",
+        mode = "n",
+      },
+      {
+        "C",
+        function()
+          require("gitsigns").nav_hunk("prev", { target = "all" })
+          vim.cmd("normal! zz")
+        end,
+        desc = "Jump to previous git hunk",
+        mode = "n",
+      },
       {
         "<leader>d",
         function()
@@ -27,16 +29,16 @@ return {
         desc = "see what changed on that line based on the changes made",
         mode = "n",
       },
-      -- {
-      --   "D",
-      --   function()
-      --     require("gitsigns").reset_hunk()
-      --   end,
-      --   desc = "reset the hunk to what it use to be",
-      --   mode = "n",
-      -- },
       {
-        "<leader>bb",
+        "<leader>B",
+        function()
+          require("gitsigns").reset_hunk()
+        end,
+        desc = "reset the hunk to what it use to be",
+        mode = "n",
+      },
+      {
+        "<leader>b",
         function()
           require("gitsigns").blame_line({
             full = true,

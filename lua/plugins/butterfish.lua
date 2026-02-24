@@ -7,7 +7,7 @@ return {
       {
         "E",
         function()
-          vim.ui.input({ prompt = "Ask A Question" }, function(msg)
+          vim.ui.input({ prompt = "Butterfish Question: " }, function(msg)
             local butterfish = require("butterfish")
             butterfish.question(vim.fn.line("'<"), vim.fn.line("'>"), msg)
           end)
@@ -18,7 +18,7 @@ return {
       {
         "R",
         function()
-          vim.ui.input({ prompt = "Describe The Rewrite" }, function(msg)
+          vim.ui.input({ prompt = "Butterfish Rewrite: " }, function(msg)
             local butterfish = require("butterfish")
             butterfish.rewrite(vim.fn.line("'<"), vim.fn.line("'>"), msg)
           end)
@@ -26,12 +26,6 @@ return {
         mode = { "v" },
         desc = "Butterfish Rewrite",
       },
-      -- { "<leader>ae", ":BFExplain<CR>",   mode = { "n" },                 desc = "Butterfish Explain" },
-      -- { "<leader>ae", ":BFExplain<CR>",   mode = { "v" },                 desc = "Butterfish Explain" },
-      -- { "<leader>af", ":BFFix<CR>",       desc = "Butterfish Fix" },
-      -- { "<leader>ai", ":BFImplement<CR>", desc = "Butterfish Implement" },
-      -- { "<leader>ad", ":BFEdit ",         desc = "Butterfish Edit" },
-      -- { "<leader>aq", ":BFQuestion ", desc = "Butterfish Question" },
     },
     config = function()
       local butterfish = require("butterfish")

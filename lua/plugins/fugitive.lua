@@ -73,10 +73,7 @@ return {
         end
       end
 
-      -- Keymap to blame the current line and open it in Gbrowse
-      vim.keymap.set("n", "c", gbrowseline, {
-        desc = "Blame current line and open in Gbrowse",
-      })
+      -- Intentionally no default keymap for `gbrowseline` to avoid overriding built-in `c`.
     end,
   },
 }
