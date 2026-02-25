@@ -30,7 +30,7 @@ return {
         mode = "n",
       },
       {
-        "<leader>B",
+        "<leader>C",
         function()
           require("gitsigns").reset_hunk()
         end,
