@@ -99,13 +99,14 @@ return {
       },
       -- Oxker
       {
-        "<leader>d",
+        "<leader>D",
         function()
           local Terminal = require("toggleterm.terminal").Terminal
-          Terminal:new({ id = 999999997, cmd = "oxker", direction = "float" })
+          Terminal
+            :new({ id = 999999997, cmd = "lazydocker", direction = "float" })
             :toggle()
         end,
-        desc = "Open Oxker (docker)",
+        desc = "Open Docker",
         mode = "n",
       },
     },
