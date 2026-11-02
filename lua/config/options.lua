@@ -5,7 +5,7 @@ vim.g.maplocalleader = "\\"
 local opt = vim.opt
 
 opt.autowrite = true
-opt.clipboard = vim.env.SSH_TTY and "" or "unnamedplus"
+opt.clipboard = "unnamedplus"
 opt.completeopt = "menu,menuone,noselect"
 opt.conceallevel = 2
 opt.confirm = true
